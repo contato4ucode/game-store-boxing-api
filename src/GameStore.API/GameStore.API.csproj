@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Mappers\" />
+    <Folder Include="Contracts\" />
   </ItemGroup>
 
 </Project>
