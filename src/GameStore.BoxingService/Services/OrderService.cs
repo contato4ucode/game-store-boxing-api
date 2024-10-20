@@ -1,7 +1,7 @@
 ﻿using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Notifications;
-using GameStore.Domain.Interfaces.Repositories;
 using GameStore.Domain.Interfaces.Services;
+using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
 using GameStore.Domain.Notifications;
 using GameStore.SharedServices.Services;
@@ -10,46 +10,59 @@ namespace GameStore.BoxingService.Services;
 
 public class OrderService : BaseService, IOrderService
 {
-    private readonly IBoxRepository _boxRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public OrderService(IBoxRepository boxRepository, INotifier notifier)
+    public OrderService(IUnitOfWork unitOfWork, INotifier notifier)
         : base(notifier)
     {
-        _boxRepository = boxRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<OrderResponse>> ProcessOrders(List<Order> orders)
     {
         try
         {
-            var availableBoxes = await _boxRepository.GetAll();
+            await _unitOfWork.BeginTransactionAsync();
+
+            var availableBoxes = await _unitOfWork.Boxes.GetAll();
             var responses = new List<OrderResponse>();
 
             foreach (var order in orders)
             {
-                var allocatedBoxes = AllocateProductsToBoxes(order.Products, availableBoxes);
+                var allocatedBoxes = OptimizeBoxAllocation(order.Products, availableBoxes);
                 responses.Add(new OrderResponse(order.Id, allocatedBoxes));
             }
+
+            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitTransactionAsync();
 
             return responses;
         }
         catch (Exception ex)
         {
+            await _unitOfWork.RollbackTransactionAsync();
             HandleException(ex);
             return Enumerable.Empty<OrderResponse>();
         }
     }
 
-    private List<BoxAllocation> AllocateProductsToBoxes(List<Product> products, IEnumerable<Box> availableBoxes)
+    private List<BoxAllocation> OptimizeBoxAllocation(List<Product> products, IEnumerable<Box> availableBoxes)
     {
         var allocations = new List<BoxAllocation>();
 
-        foreach (var product in products)
+        var sortedProducts = products
+            .OrderByDescending(p => p.Height * p.Width * p.Length)
+            .ToList();
+
+        foreach (var product in sortedProducts)
         {
-            var suitableBox = availableBoxes.FirstOrDefault(b =>
-                b.Height >= product.Height &&
-                b.Width >= product.Width &&
-                b.Length >= product.Length);
+            var suitableBox = availableBoxes
+                .Where(b =>
+                    b.Height >= product.Height &&
+                    b.Width >= product.Width &&
+                    b.Length >= product.Length)
+                .OrderBy(b => b.Height * b.Width * b.Length)
+                .FirstOrDefault();
 
             if (suitableBox == null)
             {

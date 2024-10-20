@@ -10,6 +10,14 @@ public class OrderMapping : EntityBaseMapping<Order>
     {
         base.Configure(builder);
 
+        builder.Property(o => o.CustomerId)
+               .IsRequired();
+
+        builder.Property(o => o.OrderDate)
+               .IsRequired();
+
+        builder.Ignore(o => o.TotalPrice);
+
         builder.HasMany(o => o.Products)
                .WithOne()
                .OnDelete(DeleteBehavior.Cascade);
