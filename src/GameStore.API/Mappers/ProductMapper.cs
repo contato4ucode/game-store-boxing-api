@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GameStore.API.Contracts.Reponses;
+using GameStore.API.Contracts.Requests;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Models;
@@ -12,6 +14,8 @@ public class ProductMapper : Profile
     public ProductMapper()
     {
         CreateMap<Product, ProductDTO>().ReverseMap();
+        CreateMap<Product, ProductResponse>().ReverseMap();
+        CreateMap<ProductRequest, Product>();
 
         CreateMap<PaginatedResponse<Product>, PaginatedResponse<ProductDTO>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))

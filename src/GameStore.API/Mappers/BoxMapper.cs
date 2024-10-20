@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GameStore.API.Contracts.Reponses;
+using GameStore.API.Contracts.Requests;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Models;
@@ -12,6 +14,8 @@ public class BoxMapper : Profile
     public BoxMapper()
     {
         CreateMap<Box, BoxDTO>().ReverseMap();
+        CreateMap<Box, BoxResponse>().ReverseMap();
+        CreateMap<BoxRequest, Box>();
 
         CreateMap<PaginatedResponse<Box>, PaginatedResponse<BoxDTO>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))

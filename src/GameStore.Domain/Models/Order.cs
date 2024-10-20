@@ -6,6 +6,10 @@ public class Order : EntityBase
     public DateTime OrderDate { get; private set; }
     public List<Product> Products { get; private set; } = new();
 
+    public Order()
+    {
+    }
+
     public Order(Guid customerId, DateTime orderDate, List<Product> products)
     {
         CustomerId = customerId;

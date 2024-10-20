@@ -33,8 +33,4 @@
     <ProjectReference Include="..\GameStore.Messaging\GameStore.Messaging.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Contracts\" />
-  </ItemGroup>
-
 </Project>

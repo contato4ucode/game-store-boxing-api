@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GameStore.API.Contracts.Reponses;
+using GameStore.API.Contracts.Requests;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Models;
@@ -12,6 +14,8 @@ public class OrderMapper : Profile
     public OrderMapper()
     {
         CreateMap<Order, OrderDTO>().ReverseMap();
+        CreateMap<Order, OrderResponse>().ReverseMap();
+        CreateMap<OrderRequest, Order>();
 
         CreateMap<PaginatedResponse<Order>, PaginatedResponse<OrderDTO>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))

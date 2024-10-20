@@ -15,6 +15,10 @@ public class Product : EntityBase
     /// </summary>
     public int Volume => Height * Width * Length;
 
+    public Product()
+    {
+    }
+
     public Product(string name, int height, int width, int length, double weight, decimal price, string? description = null)
     {
         Name = name;

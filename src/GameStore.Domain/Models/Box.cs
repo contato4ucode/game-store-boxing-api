@@ -12,6 +12,10 @@ public class Box : EntityBase
     /// </summary>
     public int Volume => Height * Width * Length;
 
+    public Box()
+    {
+    }
+
     public Box(string name, int height, int width, int length)
     {
         Name = name;
