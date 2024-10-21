@@ -55,15 +55,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceTests", "ServiceTest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DomainTests", "DomainTests", "{03EF5C85-27F8-4F71-BB56-6C3C8EF6D8FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStore.Infrastructure.Tests", "test\GameStore.Infrastructure.Tests\GameStore.Infrastructure.Tests.csproj", "{6BFC4EA4-B51B-4A11-8A1F-753FF0F15969}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.Infrastructure.Tests", "test\GameStore.Infrastructure.Tests\GameStore.Infrastructure.Tests.csproj", "{6BFC4EA4-B51B-4A11-8A1F-753FF0F15969}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStore.BoxingService.Tests", "test\GameStore.BoxingService.Tests\GameStore.BoxingService.Tests.csproj", "{580E5BC8-B3F4-4BF5-BE4B-45317650A082}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.BoxingService.Tests", "test\GameStore.BoxingService.Tests\GameStore.BoxingService.Tests.csproj", "{580E5BC8-B3F4-4BF5-BE4B-45317650A082}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStore.API.Tests", "test\GameStore.API.Tests\GameStore.API.Tests.csproj", "{16C035C7-7F5D-4FE8-B469-EE591FB9E4AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.API.Tests", "test\GameStore.API.Tests\GameStore.API.Tests.csproj", "{16C035C7-7F5D-4FE8-B469-EE591FB9E4AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStore.Domain.Tests", "test\GameStore.Domain.Tests\GameStore.Domain.Tests.csproj", "{B7464CBA-34C1-4989-A8CD-0CE20106143A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.Domain.Tests", "test\GameStore.Domain.Tests\GameStore.Domain.Tests.csproj", "{B7464CBA-34C1-4989-A8CD-0CE20106143A}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{54B213AB-FE46-47DC-A21D-7DD5DC8072B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{81C5C088-B508-4463-BED6-8928F08A0344}"
+	ProjectSection(SolutionItems) = preProject
+		entrada.json = entrada.json
+		saida.json = saida.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -146,6 +152,7 @@ Global
 		{580E5BC8-B3F4-4BF5-BE4B-45317650A082} = {1AC35705-686E-4EF5-A4AE-153EA606C0B8}
 		{16C035C7-7F5D-4FE8-B469-EE591FB9E4AD} = {747E4DDD-09AB-4D2D-B459-87B2A197F074}
 		{B7464CBA-34C1-4989-A8CD-0CE20106143A} = {03EF5C85-27F8-4F71-BB56-6C3C8EF6D8FE}
+		{81C5C088-B508-4463-BED6-8928F08A0344} = {0716B84A-BB53-461C-A744-413386B0F428}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5769F493-D0C2-4D09-900C-1AD35EDF0969}

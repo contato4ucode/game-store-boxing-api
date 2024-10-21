@@ -1,0 +1,99 @@
+{
+  "pedidos": [
+    {
+      "pedido_id": 1,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 2",
+          "produtos": [ "PS5", "Volante" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 2,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Joystick", "Fifa 24", "Call of Duty" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 3,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Headset" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 4,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Mouse Gamer", "Teclado Mecânico" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 5,
+      "caixas": [
+        {
+          "caixa_id": null,
+          "produtos": [ "Cadeira Gamer" ],
+          "observacao": "Produto não cabe em nenhuma caixa disponível."
+        }
+      ]
+    },
+    {
+      "pedido_id": 6,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 3",
+          "produtos": [ "Monitor", "Notebook" ]
+        },
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Webcam", "Microfone" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 7,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Jogo de Cabos" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 8,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Controle Xbox", "Carregador" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 9,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "Tablet" ]
+        }
+      ]
+    },
+    {
+      "pedido_id": 10,
+      "caixas": [
+        {
+          "caixa_id": "Caixa 1",
+          "produtos": [ "HD Externo", "Pendrive" ]
+        }
+      ]
+    }
+  ]
+}
