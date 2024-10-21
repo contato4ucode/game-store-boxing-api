@@ -38,7 +38,7 @@ public static class IdentityConfig
     {
         var appSettingsSection = configuration.GetSection("AppSettings");
         var appSettings = appSettingsSection.Get<AppSettings>();
-        appSettings.Secret = Environment.GetEnvironmentVariable("APP_SECRET") ?? throw new ArgumentException("Environment variable APP_SECRET is not set.");
+        //appSettings.Secret = Environment.GetEnvironmentVariable("APP_SECRET") ?? throw new ArgumentException("Environment variable APP_SECRET is not set.");
 
         if (string.IsNullOrWhiteSpace(appSettings.Secret) || appSettings.Secret.Length < 16)
         {

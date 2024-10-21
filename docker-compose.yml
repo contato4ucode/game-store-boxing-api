@@ -5,7 +5,10 @@ services:
     image: gamestore-api
     build:
       context: .
-      dockerfile: GameStore.API/Dockerfile
+      dockerfile: src/GameStore.API/Dockerfile
+    ports:
+      - "8081:5000"
+      - "8080:5000"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
     depends_on:
@@ -15,6 +18,7 @@ services:
 
   postgres:
     image: postgres:latest
+    restart: always
     environment:
       POSTGRES_DB: game_store
       POSTGRES_USER: postgres

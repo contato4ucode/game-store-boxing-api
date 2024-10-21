@@ -5,9 +5,10 @@ services:
     container_name: gamestore-api
     build:
       context: .
-      dockerfile: GameStore.API/Dockerfile
+      dockerfile: src/GameStore.API/Dockerfile
     ports:
-      - "7069:80"
+      - "8081:5000"
+      - "8080:5000"
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=game_store;Username=postgres;Password=password;"
       Redis__Host: redis
@@ -22,6 +23,10 @@ services:
 
   postgres:
     container_name: postgres
+    environment:
+      POSTGRES_DB: game_store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     networks:

@@ -21,7 +21,7 @@ COPY ["src/GameStore.Infrastructure/GameStore.Infrastructure.csproj", "src/GameS
 COPY ["src/GameStore.Messaging/GameStore.Messaging.csproj", "src/GameStore.Messaging/"]
 RUN dotnet restore "./src/GameStore.API/GameStore.API.csproj"
 COPY . .
-WORKDIR "/src/src/GameStore.API"
+WORKDIR "/src/GameStore.API"
 RUN dotnet build "./GameStore.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
