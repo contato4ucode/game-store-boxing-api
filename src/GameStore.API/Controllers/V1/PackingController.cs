@@ -35,7 +35,11 @@ public class PackingController : MainController
             ex =>
             {
                 HandleException(ex);
-                return CustomResponse("An error occurred while processing the orders.");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    errors = new List<string> { "An unexpected error occurred." }
+                });
             });
     }
 }

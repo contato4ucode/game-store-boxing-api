@@ -2,7 +2,7 @@
 
 public class OrderPackingResponseDTO
 {
-    public int OrderId { get; set; }
+    public string OrderId { get; set; }
     public List<BoxAllocationDTO> Boxes { get; set; } = new();
 }
 

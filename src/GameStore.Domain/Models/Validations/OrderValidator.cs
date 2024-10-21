@@ -10,7 +10,8 @@ public class OrderValidator : AbstractValidator<Order>
             .NotEmpty().WithMessage("Customer ID must be provided.");
 
         RuleFor(o => o.OrderDate)
-            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Order date cannot be in the future.");
+            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Order date cannot be in the future.")
+            .NotEmpty().WithMessage("Order date cannot be null.");
 
         RuleFor(o => o.Products)
             .NotEmpty().WithMessage("An order must contain at least one product.")
