@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  gamestore-api:
+    container_name: gamestore-api
+    build:
+      context: .
+      dockerfile: GameStore.API/Dockerfile
+    ports:
+      - "7069:80"
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=game_store;Username=postgres;Password=password;"
+      Redis__Host: redis
+      Redis__Port: 6379
+      RabbitMqSettings__HostName: rabbitmq
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - gamestore-network
+
+  postgres:
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - gamestore-network
+
+  redis:
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - gamestore-network
+
+  rabbitmq:
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - gamestore-network
+
+networks:
+  gamestore-network:
+    driver: bridge
