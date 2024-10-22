@@ -2,13 +2,13 @@
 
 public class OrderPackingResponseDTO
 {
-    public string OrderId { get; set; }
-    public List<BoxAllocationDTO> Boxes { get; set; } = new();
+    public Guid OrderId { get; set; }
+    public List<BoxAllocationDTO> Boxes { get; set; }
 }
 
 public class BoxAllocationDTO
 {
     public string? BoxId { get; set; }
-    public List<string> Products { get; set; } = new();
+    public List<string> Products { get; set; }
     public string? Observation { get; set; }
 }

@@ -19,7 +19,7 @@ public class OrderService : BaseService, IOrderService
         _orderValidator = orderValidator;
     }
 
-    public async Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds)
+    public async Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds, string userEmail)
     {
         try
         {
@@ -34,6 +34,8 @@ public class OrderService : BaseService, IOrderService
                 _notifier.NotifyValidationErrors(validationResult);
                 return null;
             }
+
+            order.CreatedByUser = userEmail;
 
             await _unitOfWork.Orders.Add(order);
             await _unitOfWork.SaveAsync();
@@ -75,7 +77,7 @@ public class OrderService : BaseService, IOrderService
         }
     }
 
-    public async Task<bool> UpdateOrderAsync(Order order)
+    public async Task<bool> UpdateOrderAsync(Order order, string userEmail)
     {
         try
         {
@@ -87,6 +89,8 @@ public class OrderService : BaseService, IOrderService
                 _notifier.NotifyValidationErrors(validationResult);
                 return false;
             }
+
+            order.UpdatedByUser = userEmail;
 
             await _unitOfWork.Orders.Update(order);
             await _unitOfWork.SaveAsync();
@@ -102,7 +106,7 @@ public class OrderService : BaseService, IOrderService
         }
     }
 
-    public async Task<bool> SoftDeleteOrderAsync(Guid orderId)
+    public async Task<bool> SoftDeleteOrderAsync(Guid orderId, string userEmail)
     {
         try
         {
@@ -112,6 +116,8 @@ public class OrderService : BaseService, IOrderService
                 _notifier.Handle("Order not found.");
                 return false;
             }
+
+            order.UpdatedByUser = userEmail;
 
             order.ToggleIsDeleted();
             await _unitOfWork.Orders.Update(order);

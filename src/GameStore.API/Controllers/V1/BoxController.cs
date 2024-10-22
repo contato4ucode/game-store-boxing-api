@@ -8,6 +8,8 @@ using GameStore.Domain.Models;
 using GameStore.Identity.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GameStore.API.Contracts.Requests;
+using GameStore.Domain.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -58,14 +60,16 @@ public class BoxController : MainController
         );
     }
 
+    [AllowAnonymous]
     [HttpGet("list")]
-    public async Task<IActionResult> GetAllBoxes()
+    public async Task<IActionResult> GetAllBoxes([FromQuery] int? page, [FromQuery] int? pageSize)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                var cacheKey = "BoxList:All";
-                var cachedBoxes = await _redisCacheService.GetCacheValueAsync<IEnumerable<BoxResponse>>(cacheKey);
+                string cacheKey = $"BoxList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
+
+                var cachedBoxes = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey);
                 if (cachedBoxes != null)
                 {
                     return CustomResponse(cachedBoxes);
@@ -73,8 +77,15 @@ public class BoxController : MainController
 
                 var boxes = await _boxService.GetAllAsync();
                 var boxResponses = _mapper.Map<IEnumerable<BoxResponse>>(boxes);
-                await _redisCacheService.SetCacheValueAsync(cacheKey, boxResponses);
-                return CustomResponse(boxResponses);
+
+                var paginatedResponse = new PaginatedResponse<BoxResponse>(
+                    boxResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
+                    boxResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
+                );
+
+                await _redisCacheService.SetCacheValueAsync(cacheKey, paginatedResponse);
+
+                return CustomResponse(paginatedResponse);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
@@ -88,7 +99,7 @@ public class BoxController : MainController
             async () =>
             {
                 var box = _mapper.Map<Box>(request);
-                var result = await _boxService.CreateBoxAsync(box);
+                var result = await _boxService.CreateBoxAsync(box, UserEmail);
                 if (!result)
                 {
                     return CustomResponse("Failed to create box", StatusCodes.Status400BadRequest);
@@ -109,21 +120,21 @@ public class BoxController : MainController
             {
                 var box = _mapper.Map<Box>(request);
                 box.Id = id;
-                await _boxService.CreateBoxAsync(box);
+                await _boxService.CreateBoxAsync(box, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
     }
 
-    [HttpPatch("{id:guid}/status")]
+    [HttpPatch("{id:guid}")]
     [ClaimsAuthorize("Box", "Delete")]
     public async Task<IActionResult> SoftDeleteBox(Guid id)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                await _boxService.SoftDeleteBoxAsync(id);
+                await _boxService.SoftDeleteBoxAsync(id, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

@@ -8,6 +8,8 @@ using GameStore.Domain.Models;
 using GameStore.Identity.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GameStore.API.Contracts.Requests;
+using Microsoft.AspNetCore.Authorization;
+using GameStore.Domain.Common;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -58,14 +60,16 @@ public class ProductController : MainController
         );
     }
 
+    [AllowAnonymous]
     [HttpGet("list")]
-    public async Task<IActionResult> GetAllProducts()
+    public async Task<IActionResult> GetAllProducts([FromQuery] int? page, [FromQuery] int? pageSize)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                var cacheKey = "ProductList:All";
-                var cachedProducts = await _redisCacheService.GetCacheValueAsync<IEnumerable<ProductResponse>>(cacheKey);
+                string cacheKey = $"ProductList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
+
+                var cachedProducts = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey);
                 if (cachedProducts != null)
                 {
                     return CustomResponse(cachedProducts);
@@ -73,8 +77,15 @@ public class ProductController : MainController
 
                 var products = await _productService.GetAllAsync();
                 var productResponses = _mapper.Map<IEnumerable<ProductResponse>>(products);
-                await _redisCacheService.SetCacheValueAsync(cacheKey, productResponses);
-                return CustomResponse(productResponses);
+
+                var paginatedResponse = new PaginatedResponse<ProductResponse>(
+                    productResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
+                    productResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
+                );
+
+                await _redisCacheService.SetCacheValueAsync(cacheKey, paginatedResponse);
+
+                return CustomResponse(paginatedResponse);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
@@ -88,7 +99,7 @@ public class ProductController : MainController
             async () =>
             {
                 var product = _mapper.Map<Product>(request);
-                var result = await _productService.CreateProductAsync(product);
+                var result = await _productService.CreateProductAsync(product, UserEmail);
                 if (!result)
                 {
                     return CustomResponse("Failed to create product", StatusCodes.Status400BadRequest);
@@ -109,21 +120,21 @@ public class ProductController : MainController
             {
                 var product = _mapper.Map<Product>(request);
                 product.Id = id;
-                await _productService.UpdateProductAsync(product);
+                await _productService.UpdateProductAsync(product, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
     }
 
-    [HttpPatch("{id:guid}/status")]
+    [HttpPatch("{id:guid}")]
     [ClaimsAuthorize("Product", "Delete")]
     public async Task<IActionResult> SoftDeleteProduct(Guid id)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                await _productService.SoftDeleteProductAsync(id);
+                await _productService.SoftDeleteProductAsync(id, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

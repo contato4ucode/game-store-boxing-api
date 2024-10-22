@@ -14,38 +14,39 @@ public class PackingService : IPackingService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<List<OrderPackingResponseDTO>> ProcessOrdersAsync(List<OrderPackingRequestDTO> orders)
+    public async Task<OrderPackingResponseDTO> ProcessOrderAsync(Guid orderId)
     {
-        var availableBoxes = await _unitOfWork.Boxes.GetAll();
-        var responses = new List<OrderPackingResponseDTO>();
-
-        foreach (var order in orders)
+        var order = await _unitOfWork.Orders.GetById(orderId);
+        if (order == null || !order.Products.Any())
         {
-            var allocations = AllocateProductsToBoxes(order.Products, availableBoxes);
-            responses.Add(new OrderPackingResponseDTO
-            {
-                OrderId = order.OrderId,
-                Boxes = allocations
-            });
+            throw new Exception("Order not found or contains no products.");
         }
 
-        return responses;
+        var availableBoxes = await _unitOfWork.Boxes.GetAll();
+        var allocations = AllocateProductsToBoxes(order.Products, availableBoxes);
+
+        return new OrderPackingResponseDTO
+        {
+            OrderId = orderId,
+            Boxes = allocations
+        };
     }
 
-    private List<BoxAllocationDTO> AllocateProductsToBoxes(List<ProductRequestDTO> products, IEnumerable<Box> availableBoxes)
+    private List<BoxAllocationDTO> AllocateProductsToBoxes(List<Product> products, IEnumerable<Box> availableBoxes)
     {
         var allocations = new List<BoxAllocationDTO>();
+
         var sortedProducts = products
-            .OrderByDescending(p => p.Dimensions.Height * p.Dimensions.Width * p.Dimensions.Length)
+            .OrderByDescending(p => p.Volume)
             .ToList();
 
         foreach (var product in sortedProducts)
         {
             var suitableBox = availableBoxes
                 .Where(b =>
-                    b.Height >= product.Dimensions.Height &&
-                    b.Width >= product.Dimensions.Width &&
-                    b.Length >= product.Dimensions.Length)
+                    b.Height >= product.Height &&
+                    b.Width >= product.Width &&
+                    b.Length >= product.Length)
                 .OrderBy(b => b.Volume)
                 .FirstOrDefault();
 
@@ -54,7 +55,7 @@ public class PackingService : IPackingService
                 allocations.Add(new BoxAllocationDTO
                 {
                     BoxId = null,
-                    Products = new List<string> { product.ProductId },
+                    Products = new List<string> { product.Name },
                     Observation = "Produto não cabe em nenhuma caixa disponível."
                 });
                 continue;
@@ -71,7 +72,7 @@ public class PackingService : IPackingService
                 allocations.Add(allocation);
             }
 
-            allocation.Products.Add(product.ProductId);
+            allocation.Products.Add(product.Name);
         }
 
         return allocations;

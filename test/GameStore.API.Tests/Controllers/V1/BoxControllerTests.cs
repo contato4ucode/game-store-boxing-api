@@ -104,7 +104,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         _boxServiceMock.GetAllAsync().Returns(Task.FromResult((IEnumerable<Box>)boxes));
         _mapperMock.Map<IEnumerable<BoxResponse>>(boxes).Returns(boxResponses);
 
-        var result = await controller.GetAllBoxes();
+        var result = await controller.GetAllBoxes(1, 20);
         var okResult = Assert.IsType<OkObjectResult>(result);
 
         Assert.NotNull(okResult.Value);
@@ -120,17 +120,21 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     [Fact]
     public async Task CreateBox_ShouldReturnCreated_WhenBoxIsValid()
     {
+        // Arrange
         var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
         var box = new Box("Box 1", 10, 10, 10);
         var boxResponse = new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
+        var userEmail = "test@email.com";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box).Returns(Task.FromResult(true));
+        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(true);
         _mapperMock.Map<BoxResponse>(box).Returns(boxResponse);
 
+        // Act
         var result = await controller.CreateBox(boxRequest);
-        var createdResult = Assert.IsType<ObjectResult>(result);
 
+        // Assert
+        var createdResult = Assert.IsType<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status201Created, createdResult.StatusCode);
         Assert.NotNull(createdResult.Value);
 
@@ -144,9 +148,10 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     {
         var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
         var box = new Box("Box 1", 10, 10, 10);
+        var userEmail = "test@email";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box).Returns(Task.FromResult(false));
+        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(Task.FromResult(false));
 
         var result = await controller.CreateBox(boxRequest);
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -160,9 +165,10 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
         var boxId = Guid.NewGuid();
         var box = new Box("Box 1", 10, 10, 10) { Id = boxId };
+        var userEmail = "test@email";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box).Returns(Task.FromResult(true));
+        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(Task.FromResult(true));
 
         var result = await controller.UpdateBox(boxId, boxRequest);
         Assert.IsType<NoContentResult>(result);
@@ -173,14 +179,15 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     {
         // Arrange
         var boxId = Guid.NewGuid();
+        var userEmail = "test@email";
 
-        _boxServiceMock.SoftDeleteBoxAsync(boxId).Returns(Task.FromResult(true));
+        _boxServiceMock.SoftDeleteBoxAsync(boxId, userEmail).Returns(Task.FromResult(true));
 
         // Act
         var result = await controller.SoftDeleteBox(boxId);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        await _boxServiceMock.Received(1).SoftDeleteBoxAsync(boxId);
+        await _boxServiceMock.Received(1).SoftDeleteBoxAsync(boxId, userEmail);
     }
 }

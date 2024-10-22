@@ -68,34 +68,25 @@ public class OrderController : MainController
         return await HandleRequestAsync(
             async () =>
             {
-                string cacheKey = "OrderList:All";
+                string cacheKey = $"OrderList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
 
-                if (page.HasValue && pageSize.HasValue)
+                var cachedOrders = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<OrderResponse>>(cacheKey);
+                if (cachedOrders != null)
                 {
-                    var cachedOrders = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<OrderResponse>>(cacheKey);
-                    if (cachedOrders != null)
-                    {
-                        return CustomResponse(cachedOrders);
-                    }
-
-                    var orders = await _orderService.GetAllOrdersAsync();
-                    var orderResponses = _mapper.Map<IEnumerable<OrderResponse>>(orders);
-                    await _redisCacheService.SetCacheValueAsync(cacheKey, orderResponses);
-
-                    return CustomResponse(orderResponses);
+                    return CustomResponse(cachedOrders);
                 }
 
-                var cachedList = await _redisCacheService.GetCacheValueAsync<IEnumerable<OrderResponse>>(cacheKey);
-                if (cachedList != null)
-                {
-                    return CustomResponse(cachedList);
-                }
+                var orders = await _orderService.GetAllOrdersAsync();
+                var orderResponses = _mapper.Map<IEnumerable<OrderResponse>>(orders);
 
-                var allOrders = await _orderService.GetAllOrdersAsync();
-                var responses = _mapper.Map<IEnumerable<OrderResponse>>(allOrders);
-                await _redisCacheService.SetCacheValueAsync(cacheKey, responses);
+                var paginatedResponse = new PaginatedResponse<OrderResponse>(
+                    orderResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
+                    orderResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
+                );
 
-                return CustomResponse(responses);
+                await _redisCacheService.SetCacheValueAsync(cacheKey, paginatedResponse);
+
+                return CustomResponse(paginatedResponse);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
@@ -108,7 +99,7 @@ public class OrderController : MainController
         return await HandleRequestAsync(
             async () =>
             {
-                var order = await _orderService.CreateOrderAsync(request.CustomerId, request.ProductIds);
+                var order = await _orderService.CreateOrderAsync(request.CustomerId, request.ProductIds, UserEmail);
                 if (order == null)
                 {
                     return CustomResponse("Order creation failed", StatusCodes.Status400BadRequest);
@@ -130,21 +121,21 @@ public class OrderController : MainController
             {
                 var order = _mapper.Map<Order>(orderDto);
                 order.Id = id;
-                await _orderService.UpdateOrderAsync(order);
+                await _orderService.UpdateOrderAsync(order, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
         );
     }
 
-    [HttpPatch("{id:guid}/status")]
+    [HttpPatch("{id:guid}")]
     [ClaimsAuthorize("Order", "Delete")]
     public async Task<IActionResult> SoftDeleteOrder(Guid id)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                await _orderService.SoftDeleteOrderAsync(id);
+                await _orderService.SoftDeleteOrderAsync(id, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

@@ -34,6 +34,7 @@ public class OrderServiceTests
         {
             new Product("Test Product", 10, 10, 10, 2.0, 50.0m)
         };
+        var userEmail = "test@email";
 
         _unitOfWork.Products.Find(Arg.Any<Expression<Func<Product, bool>>>())
             .Returns(Task.FromResult(products.AsEnumerable()));
@@ -42,7 +43,7 @@ public class OrderServiceTests
             .Returns(Task.FromResult(new ValidationResult()));
 
         // Act
-        var result = await _orderService.CreateOrderAsync(customerId, productIds);
+        var result = await _orderService.CreateOrderAsync(customerId, productIds, userEmail);
 
         // Assert
         Assert.NotNull(result);
@@ -59,6 +60,7 @@ public class OrderServiceTests
         var productIds = new List<Guid> { Guid.NewGuid() };
         var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
         var order = new Order(customerId, DateTime.UtcNow, products);
+        var userEmail = "test@email";
 
         var validationResult = new ValidationResult(new List<ValidationFailure>
         {
@@ -69,7 +71,7 @@ public class OrderServiceTests
         _orderValidator.ValidateAsync(Arg.Any<Order>()).Returns(validationResult);
 
         // Act
-        var result = await _orderService.CreateOrderAsync(customerId, productIds);
+        var result = await _orderService.CreateOrderAsync(customerId, productIds, userEmail);
 
         // Assert
         Assert.Null(result);
@@ -145,10 +147,11 @@ public class OrderServiceTests
         // Arrange
         var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
+        var userEmail = "test@email";
         _orderValidator.ValidateAsync(order).Returns(new ValidationResult());
 
         // Act
-        var result = await _orderService.UpdateOrderAsync(order);
+        var result = await _orderService.UpdateOrderAsync(order, userEmail);
 
         // Assert
         Assert.True(result);
@@ -162,6 +165,7 @@ public class OrderServiceTests
         // Arrange
         var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
+        var userEmail = "test@email";
         var validationResult = new ValidationResult(new List<ValidationFailure>
         {
             new ValidationFailure("CustomerId", "Customer ID is required.")
@@ -169,7 +173,7 @@ public class OrderServiceTests
         _orderValidator.ValidateAsync(order).Returns(validationResult);
 
         // Act
-        var result = await _orderService.UpdateOrderAsync(order);
+        var result = await _orderService.UpdateOrderAsync(order, userEmail);
 
         // Assert
         Assert.False(result);
@@ -183,10 +187,11 @@ public class OrderServiceTests
         var orderId = Guid.NewGuid();
         var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
+        var userEmail = "test@email";
         _unitOfWork.Orders.GetById(orderId).Returns(order);
 
         // Act
-        var result = await _orderService.SoftDeleteOrderAsync(orderId);
+        var result = await _orderService.SoftDeleteOrderAsync(orderId, userEmail);
 
         // Assert
         Assert.True(result);
@@ -200,10 +205,11 @@ public class OrderServiceTests
     {
         // Arrange
         var orderId = Guid.NewGuid();
+        var userEmail = "test@email";
         _unitOfWork.Orders.GetById(orderId).Returns((Order)null);
 
         // Act
-        var result = await _orderService.SoftDeleteOrderAsync(orderId);
+        var result = await _orderService.SoftDeleteOrderAsync(orderId, userEmail);
 
         // Assert
         Assert.False(result);

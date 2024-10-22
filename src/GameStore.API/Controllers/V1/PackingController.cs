@@ -3,10 +3,12 @@ using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
 
 namespace GameStore.API.Controllers.V1;
 
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/packing")]
 public class PackingController : MainController
 {
     private readonly IPackingService _packingService;
@@ -20,8 +22,8 @@ public class PackingController : MainController
         _packingService = packingService;
     }
 
-    [HttpPost("process-orders")]
-    public async Task<IActionResult> ProcessOrders([FromBody] List<OrderPackingRequestDTO> orders)
+    [HttpPost("process-order/{orderId:guid}")]
+    public async Task<IActionResult> ProcessOrder(Guid orderId)
     {
         if (!ModelState.IsValid)
             return CustomResponse(ModelState);
@@ -29,7 +31,7 @@ public class PackingController : MainController
         return await HandleRequestAsync(
             async () =>
             {
-                var result = await _packingService.ProcessOrdersAsync(orders);
+                var result = await _packingService.ProcessOrderAsync(orderId);
                 return CustomResponse(result);
             },
             ex =>

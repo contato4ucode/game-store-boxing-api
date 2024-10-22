@@ -93,7 +93,7 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         _mapperMock.Map<IEnumerable<ProductResponse>>(products).Returns(productResponses);
 
         // Act
-        var result = await controller.GetAllProducts();
+        var result = await controller.GetAllProducts(1, 20);
         var okResult = Assert.IsType<OkObjectResult>(result);
 
         // Assert
@@ -110,9 +110,10 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         var productRequest = new ProductRequest { Name = "Product 1", Price = 100 };
         var product = new Product();
         var productResponse = new ProductResponse();
+        var userEmail = "test@email";
 
         _mapperMock.Map<Product>(productRequest).Returns(product);
-        _productServiceMock.CreateProductAsync(product).Returns(true);
+        _productServiceMock.CreateProductAsync(product, userEmail).Returns(true);
         _mapperMock.Map<ProductResponse>(product).Returns(productResponse);
 
         // Act
@@ -132,9 +133,10 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         // Arrange
         var productRequest = new ProductRequest { Name = "Product 1", Price = 100 };
         var product = new Product();
+        var userEmail = "test@email";
 
         _mapperMock.Map<Product>(productRequest).Returns(product);
-        _productServiceMock.CreateProductAsync(product).Returns(false);
+        _productServiceMock.CreateProductAsync(product, userEmail).Returns(false);
 
         // Act
         var result = await controller.CreateProduct(productRequest);
@@ -153,9 +155,10 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         var productId = Guid.NewGuid();
         var productRequest = new ProductRequest { Name = "Updated Product", Price = 150 };
         var product = new Product { Id = productId };
+        var userEmail = "test@email";
 
         _mapperMock.Map<Product>(productRequest).Returns(product);
-        _productServiceMock.UpdateProductAsync(product).Returns(true);
+        _productServiceMock.UpdateProductAsync(product, userEmail).Returns(true);
 
         // Act
         var result = await controller.UpdateProduct(productId, productRequest);
@@ -169,14 +172,15 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var userEmail = "test@email";
 
-        _productServiceMock.SoftDeleteProductAsync(productId).Returns(Task.FromResult(true));
+        _productServiceMock.SoftDeleteProductAsync(productId, userEmail).Returns(Task.FromResult(true));
 
         // Act
         var result = await controller.SoftDeleteProduct(productId);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        await _productServiceMock.Received(1).SoftDeleteProductAsync(productId);
+        await _productServiceMock.Received(1).SoftDeleteProductAsync(productId, userEmail);
     }
 }

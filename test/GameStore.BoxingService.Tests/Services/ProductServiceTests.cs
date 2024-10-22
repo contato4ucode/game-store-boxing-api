@@ -76,10 +76,11 @@ public class ProductServiceTests
     {
         // Arrange
         var product = new Product("Valid Product", 10, 10, 10, 2.0, 100.0m);
+        var userEmail = "test@email";
         _productValidator.ValidateAsync(product).Returns(new ValidationResult());
 
         // Act
-        var result = await _productService.CreateProductAsync(product);
+        var result = await _productService.CreateProductAsync(product, userEmail);
 
         // Assert
         Assert.True(result);
@@ -92,6 +93,7 @@ public class ProductServiceTests
     {
         // Arrange
         var product = new Product("Invalid Product", 10, 10, 10, 2.0, 100.0m);
+        var userEmail = "test@email";
         var validationResult = new ValidationResult(new List<ValidationFailure>
             {
                 new ValidationFailure("Name", "Product name is required.")
@@ -100,7 +102,7 @@ public class ProductServiceTests
         _productValidator.ValidateAsync(product).Returns(validationResult);
 
         // Act
-        var result = await _productService.CreateProductAsync(product);
+        var result = await _productService.CreateProductAsync(product, userEmail);
 
         // Assert
         Assert.False(result);
@@ -112,10 +114,11 @@ public class ProductServiceTests
     {
         // Arrange
         var product = new Product("Updated Product", 10, 10, 10, 2.0, 100.0m);
+        var userEmail = "test@email";
         _productValidator.ValidateAsync(product).Returns(new ValidationResult());
 
         // Act
-        var result = await _productService.UpdateProductAsync(product);
+        var result = await _productService.UpdateProductAsync(product, userEmail);
 
         // Assert
         Assert.True(result);
@@ -128,6 +131,7 @@ public class ProductServiceTests
     {
         // Arrange
         var product = new Product("Invalid Product", 10, 10, 10, 2.0, 100.0m);
+        var userEmail = "test@email";
         var validationResult = new ValidationResult(new List<ValidationFailure>
             {
                 new ValidationFailure("Price", "Price must be greater than zero.")
@@ -136,7 +140,7 @@ public class ProductServiceTests
         _productValidator.ValidateAsync(product).Returns(validationResult);
 
         // Act
-        var result = await _productService.UpdateProductAsync(product);
+        var result = await _productService.UpdateProductAsync(product, userEmail);
 
         // Assert
         Assert.False(result);
@@ -149,10 +153,11 @@ public class ProductServiceTests
         // Arrange
         var productId = Guid.NewGuid();
         var product = new Product("Product to Delete", 10, 10, 10, 1.0, 50.0m);
+        var userEmail = "test@email";
         _unitOfWork.Products.GetById(productId).Returns(product);
 
         // Act
-        var result = await _productService.SoftDeleteProductAsync(productId);
+        var result = await _productService.SoftDeleteProductAsync(productId, userEmail);
 
         // Assert
         Assert.True(result);
@@ -166,10 +171,11 @@ public class ProductServiceTests
     {
         // Arrange
         var productId = Guid.NewGuid();
+        var userEmail = "test@email";
         _unitOfWork.Products.GetById(productId).Returns((Product)null);
 
         // Act
-        var result = await _productService.SoftDeleteProductAsync(productId);
+        var result = await _productService.SoftDeleteProductAsync(productId, userEmail);
 
         // Assert
         Assert.False(result);

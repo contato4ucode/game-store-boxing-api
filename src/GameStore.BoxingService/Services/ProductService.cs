@@ -45,7 +45,7 @@ public class ProductService : BaseService, IProductService
         }
     }
 
-    public async Task<bool> CreateProductAsync(Product product)
+    public async Task<bool> CreateProductAsync(Product product, string userEmail)
     {
         try
         {
@@ -57,6 +57,8 @@ public class ProductService : BaseService, IProductService
                 _notifier.NotifyValidationErrors(validationResult);
                 return false;
             }
+
+            product.CreatedByUser = userEmail;
 
             await _unitOfWork.Products.Add(product);
             await _unitOfWork.SaveAsync();
@@ -72,7 +74,7 @@ public class ProductService : BaseService, IProductService
         }
     }
 
-    public async Task<bool> UpdateProductAsync(Product product)
+    public async Task<bool> UpdateProductAsync(Product product, string userEmail)
     {
         try
         {
@@ -84,6 +86,8 @@ public class ProductService : BaseService, IProductService
                 _notifier.NotifyValidationErrors(validationResult);
                 return false;
             }
+
+            product.UpdatedByUser = userEmail;
 
             await _unitOfWork.Products.Update(product);
             await _unitOfWork.SaveAsync();
@@ -99,7 +103,7 @@ public class ProductService : BaseService, IProductService
         }
     }
 
-    public async Task<bool> SoftDeleteProductAsync(Guid productId)
+    public async Task<bool> SoftDeleteProductAsync(Guid productId, string userEmail)
     {
         try
         {
@@ -109,6 +113,8 @@ public class ProductService : BaseService, IProductService
                 _notifier.Handle("Product not found.");
                 return false;
             }
+
+            product.UpdatedByUser = userEmail;
 
             product.ToggleIsDeleted();
             await _unitOfWork.Products.Update(product);

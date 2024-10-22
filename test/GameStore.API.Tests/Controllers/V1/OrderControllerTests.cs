@@ -114,8 +114,9 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         var orderRequest = new OrderRequest { CustomerId = Guid.NewGuid(), ProductIds = new List<Guid> { Guid.NewGuid() } };
         var order = new Order();
         var orderResponse = new OrderResponse();
+        var userEmail = "test@email";
 
-        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds).Returns(order);
+        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail).Returns(order);
         _mapperMock.Map<OrderResponse>(order).Returns(orderResponse);
 
         // Act
@@ -133,8 +134,9 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     public async Task CreateOrder_ShouldReturnBadRequest_WhenOrderCreationFails()
     {
         // Arrange
+        var userEmail = "test@email";
         var orderRequest = new OrderRequest { CustomerId = Guid.NewGuid(), ProductIds = new List<Guid> { Guid.NewGuid() } };
-        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds).Returns((Order)null);
+        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail).Returns((Order)null);
 
         // Act
         var result = await controller.CreateOrder(orderRequest);
@@ -151,14 +153,15 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        _orderServiceMock.SoftDeleteOrderAsync(orderId).Returns(Task.FromResult(true));
+        var userEmail = "test@email";
+        _orderServiceMock.SoftDeleteOrderAsync(orderId, userEmail).Returns(Task.FromResult(true));
 
         // Act
         var result = await controller.SoftDeleteOrder(orderId);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        await _orderServiceMock.Received(1).SoftDeleteOrderAsync(orderId);
+        await _orderServiceMock.Received(1).SoftDeleteOrderAsync(orderId, userEmail);
     }
 
     [Fact]
@@ -168,15 +171,16 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         var orderId = Guid.NewGuid();
         var orderDto = new OrderDTO();
         var order = new Order { Id = orderId };
+        var userEmail = "test@email";
 
         _mapperMock.Map<Order>(orderDto).Returns(order);
-        _orderServiceMock.UpdateOrderAsync(order).Returns(true);
+        _orderServiceMock.UpdateOrderAsync(order, userEmail).Returns(true);
 
         // Act
         var result = await controller.UpdateOrder(orderId, orderDto);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        await _orderServiceMock.Received(1).UpdateOrderAsync(order);
+        await _orderServiceMock.Received(1).UpdateOrderAsync(order, userEmail);
     }
 }

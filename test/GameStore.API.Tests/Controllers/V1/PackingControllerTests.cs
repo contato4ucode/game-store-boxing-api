@@ -27,45 +27,27 @@ public class PackingControllerTests : BaseControllerTests<PackingController>
     }
 
     [Fact]
-    public async Task ProcessOrders_ShouldReturnOk_WhenOrdersAreProcessedSuccessfully()
+    public async Task ProcessOrder_ShouldReturnOk_WhenOrderIsProcessedSuccessfully()
     {
         // Arrange
-        var orders = new List<OrderPackingRequestDTO>
+        var orderId = Guid.NewGuid();
+        var response = new OrderPackingResponseDTO
         {
-            new OrderPackingRequestDTO
+            OrderId = orderId,
+            Boxes = new List<BoxAllocationDTO>
             {
-                OrderId = "Order1",
-                Products = new List<ProductRequestDTO>
+                new BoxAllocationDTO
                 {
-                    new ProductRequestDTO
-                    {
-                        ProductId = "P1",
-                        Dimensions = new DimensionsDTO { Height = 10, Width = 10, Length = 10 }
-                    }
+                    BoxId = "Box1",
+                    Products = new List<string> { "P1" }
                 }
             }
         };
 
-        var response = new List<OrderPackingResponseDTO>
-        {
-            new OrderPackingResponseDTO
-            {
-                OrderId = "Order1",
-                Boxes = new List<BoxAllocationDTO>
-                {
-                    new BoxAllocationDTO
-                    {
-                        BoxId = "Box1",
-                        Products = new List<string> { "P1" }
-                    }
-                }
-            }
-        };
-
-        _packingServiceMock.ProcessOrdersAsync(orders).Returns(response);
+        _packingServiceMock.ProcessOrderAsync(orderId).Returns(response);
 
         // Act
-        var result = await controller.ProcessOrders(orders);
+        var result = await controller.ProcessOrder(orderId);
         var okResult = Assert.IsType<OkObjectResult>(result);
 
         // Assert
@@ -76,18 +58,15 @@ public class PackingControllerTests : BaseControllerTests<PackingController>
     }
 
     [Fact]
-    public async Task ProcessOrders_ShouldReturnBadRequest_WhenModelStateIsInvalid()
+    public async Task ProcessOrder_ShouldReturnBadRequest_WhenModelStateIsInvalid()
     {
         // Arrange
         controller.ModelState.AddModelError("OrderId", "OrderId is required");
 
-        var orders = new List<OrderPackingRequestDTO>
-        {
-            new OrderPackingRequestDTO { OrderId = null }
-        };
+        var orderId = Guid.Empty;
 
         // Act
-        var result = await controller.ProcessOrders(orders);
+        var result = await controller.ProcessOrder(orderId);
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
 
         // Assert
@@ -95,5 +74,26 @@ public class PackingControllerTests : BaseControllerTests<PackingController>
         Assert.False((bool)response.GetType().GetProperty("success").GetValue(response));
         var errors = response.GetType().GetProperty("errors").GetValue(response) as List<string>;
         Assert.Contains("OrderId is required", errors);
+    }
+
+    [Fact]
+    public async Task ProcessOrder_ShouldReturnInternalServerError_WhenExceptionIsThrown()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        _packingServiceMock.When(x => x.ProcessOrderAsync(orderId))
+                           .Do(x => throw new Exception("Unexpected error"));
+
+        // Act
+        var result = await controller.ProcessOrder(orderId);
+        var errorResult = Assert.IsType<ObjectResult>(result);
+
+        // Assert
+        Assert.Equal(500, errorResult.StatusCode);
+        var response = errorResult.Value as IDictionary<string, object>;
+        Assert.NotNull(response);
+        Assert.False((bool)response["success"]);
+        var errors = response["errors"] as List<string>;
+        Assert.Contains("An unexpected error occurred.", errors);
     }
 }

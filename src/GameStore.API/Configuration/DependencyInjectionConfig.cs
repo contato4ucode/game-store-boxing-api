@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using GameStore.BoxingService.Services;
 using GameStore.Domain.Interfaces;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Repositories;
@@ -38,7 +39,7 @@ public static class DependencyInjectionConfig
             .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service") ||
                                                          type.Name.EndsWith("Repository") ||
                                                          type.Name.EndsWith("UnitOfWork") ||
-                                                         type.Name.EndsWith("Validation")))
+                                                         type.Name.EndsWith("Validator")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
             .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Producer") ||
@@ -64,6 +65,10 @@ public static class DependencyInjectionConfig
         services.TryAddScoped<IBoxRepository, BoxRepository>();
         services.TryAddScoped<IOrderRepository, OrderRepository>();
         services.TryAddScoped<IProductRepository, ProductRepository>();
+        services.TryAddScoped<IBoxService, BoxService>();
+        services.TryAddScoped<IOrderService, OrderService>();
+        services.TryAddScoped<IProductService, ProductService>();
+        services.TryAddScoped<IPackingService, PackingService>();
         services.TryAddScoped<IAspNetUser, AspNetUser>();
         services.TryAddScoped<IAuthService, AuthService>();
         services.TryAddScoped<RoleManager<IdentityRole>>();

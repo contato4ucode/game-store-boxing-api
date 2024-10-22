@@ -6,7 +6,7 @@ public interface IBoxService
 {
     Task<Box?> GetByIdAsync(Guid boxId);
     Task<IEnumerable<Box>> GetAllAsync();
-    Task<bool> CreateBoxAsync(Box box);
-    Task<bool> UpdateBoxAsync(Box box);
-    Task<bool> SoftDeleteBoxAsync(Guid boxId);
+    Task<bool> CreateBoxAsync(Box box, string userEmail);
+    Task<bool> UpdateBoxAsync(Box box, string userEmail);
+    Task<bool> SoftDeleteBoxAsync(Guid boxId, string userEmail);
 }

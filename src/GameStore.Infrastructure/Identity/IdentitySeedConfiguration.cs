@@ -6,11 +6,13 @@ namespace GameStore.Infrastructure.Identity;
 
 public class IdentityUserConfiguration : IEntityTypeConfiguration<IdentityUser>
 {
+    public static readonly string AdminUserId = Guid.NewGuid().ToString();
+
     public void Configure(EntityTypeBuilder<IdentityUser> builder)
     {
         var adminUser = new IdentityUser
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = AdminUserId,
             UserName = "admin@example.com",
             NormalizedUserName = "ADMIN@EXAMPLE.COM",
             Email = "admin@example.com",
@@ -45,7 +47,7 @@ public class IdentityUserRoleConfiguration : IEntityTypeConfiguration<IdentityUs
         builder.HasData(
             new IdentityUserRole<string>
             {
-                UserId = "1",
+                UserId = IdentityUserConfiguration.AdminUserId,
                 RoleId = "1"
             }
         );
@@ -57,18 +59,18 @@ public class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityU
     public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder)
     {
         builder.HasData(
-            new IdentityUserClaim<string> { Id = 1, UserId = "1", ClaimType = "Box", ClaimValue = "Get" },
-            new IdentityUserClaim<string> { Id = 2, UserId = "1", ClaimType = "Box", ClaimValue = "Add" },
-            new IdentityUserClaim<string> { Id = 3, UserId = "1", ClaimType = "Box", ClaimValue = "Update" },
-            new IdentityUserClaim<string> { Id = 4, UserId = "1", ClaimType = "Box", ClaimValue = "Delete" },
-            new IdentityUserClaim<string> { Id = 5, UserId = "1", ClaimType = "Order", ClaimValue = "Get" },
-            new IdentityUserClaim<string> { Id = 6, UserId = "1", ClaimType = "Order", ClaimValue = "Add" },
-            new IdentityUserClaim<string> { Id = 7, UserId = "1", ClaimType = "Order", ClaimValue = "Update" },
-            new IdentityUserClaim<string> { Id = 8, UserId = "1", ClaimType = "Order", ClaimValue = "Delete" },
-            new IdentityUserClaim<string> { Id = 9, UserId = "1", ClaimType = "Product", ClaimValue = "Get" },
-            new IdentityUserClaim<string> { Id = 10, UserId = "1", ClaimType = "Product", ClaimValue = "Add" },
-            new IdentityUserClaim<string> { Id = 11, UserId = "1", ClaimType = "Product", ClaimValue = "Update" },
-            new IdentityUserClaim<string> { Id = 12, UserId = "1", ClaimType = "Product", ClaimValue = "Delete" }
+            new IdentityUserClaim<string> { Id = 1, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Box", ClaimValue = "Get" },
+            new IdentityUserClaim<string> { Id = 2, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Box", ClaimValue = "Add" },
+            new IdentityUserClaim<string> { Id = 3, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Box", ClaimValue = "Update" },
+            new IdentityUserClaim<string> { Id = 4, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Box", ClaimValue = "Delete" },
+            new IdentityUserClaim<string> { Id = 5, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Order", ClaimValue = "Get" },
+            new IdentityUserClaim<string> { Id = 6, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Order", ClaimValue = "Add" },
+            new IdentityUserClaim<string> { Id = 7, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Order", ClaimValue = "Update" },
+            new IdentityUserClaim<string> { Id = 8, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Order", ClaimValue = "Delete" },
+            new IdentityUserClaim<string> { Id = 9, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Product", ClaimValue = "Get" },
+            new IdentityUserClaim<string> { Id = 10, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Product", ClaimValue = "Add" },
+            new IdentityUserClaim<string> { Id = 11, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Product", ClaimValue = "Update" },
+            new IdentityUserClaim<string> { Id = 12, UserId = IdentityUserConfiguration.AdminUserId, ClaimType = "Product", ClaimValue = "Delete" }
         );
     }
 }

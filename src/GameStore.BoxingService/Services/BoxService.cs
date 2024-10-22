@@ -45,7 +45,7 @@ public class BoxService : BaseService, IBoxService
         }
     }
 
-    public async Task<bool> CreateBoxAsync(Box box)
+    public async Task<bool> CreateBoxAsync(Box box, string userEmail)
     {
         try
         {
@@ -57,6 +57,8 @@ public class BoxService : BaseService, IBoxService
                 _notifier.NotifyValidationErrors(validationResult);
                 return false;
             }
+
+            box.CreatedByUser = userEmail;
 
             await _unitOfWork.Boxes.Add(box);
             await _unitOfWork.SaveAsync();
@@ -72,7 +74,7 @@ public class BoxService : BaseService, IBoxService
         }
     }
 
-    public async Task<bool> UpdateBoxAsync(Box box)
+    public async Task<bool> UpdateBoxAsync(Box box, string userEmail)
     {
         try
         {
@@ -84,6 +86,8 @@ public class BoxService : BaseService, IBoxService
                 _notifier.NotifyValidationErrors(validationResult);
                 return false;
             }
+
+            box.UpdatedByUser = userEmail;
 
             await _unitOfWork.Boxes.Update(box);
             await _unitOfWork.SaveAsync();
@@ -99,7 +103,7 @@ public class BoxService : BaseService, IBoxService
         }
     }
 
-    public async Task<bool> SoftDeleteBoxAsync(Guid boxId)
+    public async Task<bool> SoftDeleteBoxAsync(Guid boxId, string userEmail)
     {
         try
         {
@@ -109,6 +113,8 @@ public class BoxService : BaseService, IBoxService
                 _notifier.Handle("Box not found.");
                 return false;
             }
+
+            box.UpdatedByUser = userEmail;
 
             box.ToggleIsDeleted();
             await _unitOfWork.Boxes.Update(box);

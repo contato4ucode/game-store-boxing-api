@@ -77,10 +77,11 @@ public class BoxServiceTests
     {
         // Arrange
         var box = new Box("Box 1", 30, 40, 80);
+        var userEmail = "test@email";
         _boxValidator.ValidateAsync(box).Returns(new ValidationResult());
 
         // Act
-        var result = await _boxService.CreateBoxAsync(box);
+        var result = await _boxService.CreateBoxAsync(box, userEmail);
 
         // Assert
         Assert.True(result);
@@ -93,6 +94,7 @@ public class BoxServiceTests
     {
         // Arrange
         var box = new Box("Invalid Box", -10, 40, 80);
+        var userEmail = "test@email";
         var validationResult = new ValidationResult(new List<ValidationFailure>
         {
             new ValidationFailure("Height", "Height must be positive.")
@@ -100,7 +102,7 @@ public class BoxServiceTests
         _boxValidator.ValidateAsync(box).Returns(validationResult);
 
         // Act
-        var result = await _boxService.CreateBoxAsync(box);
+        var result = await _boxService.CreateBoxAsync(box, userEmail);
 
         // Assert
         Assert.False(result);
@@ -113,10 +115,11 @@ public class BoxServiceTests
     {
         // Arrange
         var box = new Box("Box 1", 30, 40, 80);
+        var userEmail = "test@email";
         _boxValidator.ValidateAsync(box).Returns(new ValidationResult());
 
         // Act
-        var result = await _boxService.UpdateBoxAsync(box);
+        var result = await _boxService.UpdateBoxAsync(box, userEmail);
 
         // Assert
         Assert.True(result);
@@ -130,10 +133,11 @@ public class BoxServiceTests
         // Arrange
         var boxId = Guid.NewGuid();
         var box = new Box("Box 1", 30, 40, 80);
+        var userEmail = "test@email";
         _unitOfWork.Boxes.GetById(boxId).Returns(box);
 
         // Act
-        var result = await _boxService.SoftDeleteBoxAsync(boxId);
+        var result = await _boxService.SoftDeleteBoxAsync(boxId, userEmail);
 
         // Assert
         Assert.True(result);
@@ -147,10 +151,11 @@ public class BoxServiceTests
     {
         // Arrange
         var boxId = Guid.NewGuid();
+        var userEmail = "test@email";
         _unitOfWork.Boxes.GetById(boxId).Returns((Box)null);
 
         // Act
-        var result = await _boxService.SoftDeleteBoxAsync(boxId);
+        var result = await _boxService.SoftDeleteBoxAsync(boxId, userEmail);
 
         // Assert
         Assert.False(result);
