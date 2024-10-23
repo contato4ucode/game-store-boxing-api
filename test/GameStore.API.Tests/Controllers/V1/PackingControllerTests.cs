@@ -86,14 +86,20 @@ public class PackingControllerTests : BaseControllerTests<PackingController>
 
         // Act
         var result = await controller.ProcessOrder(orderId);
-        var errorResult = Assert.IsType<ObjectResult>(result);
 
         // Assert
+        var errorResult = Assert.IsType<ObjectResult>(result);
         Assert.Equal(500, errorResult.StatusCode);
-        var response = errorResult.Value as IDictionary<string, object>;
+
+        Assert.NotNull(errorResult.Value);
+
+        var response = errorResult.Value as Dictionary<string, object>;
         Assert.NotNull(response);
+
         Assert.False((bool)response["success"]);
+
         var errors = response["errors"] as List<string>;
+        Assert.NotNull(errors);
         Assert.Contains("An unexpected error occurred.", errors);
     }
 }

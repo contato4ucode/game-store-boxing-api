@@ -95,6 +95,9 @@ public class BoxController : MainController
     [ClaimsAuthorize("Box", "Add")]
     public async Task<IActionResult> CreateBox([FromBody] BoxRequest request)
     {
+        if (!ModelState.IsValid)
+            return CustomResponse(ModelState);
+
         return await HandleRequestAsync(
             async () =>
             {

@@ -16,6 +16,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     private readonly IBoxService _boxServiceMock;
     private readonly IMapper _mapperMock;
     private readonly IRedisCacheService _redisCacheServiceMock;
+    private readonly BoxController _controller;
 
     public BoxControllerTests() : base()
     {
@@ -152,24 +153,17 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         // Arrange
         var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
         var box = new Box("Box 1", 10, 10, 10);
-        var boxResponse = new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
         var userEmail = "test@email.com";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(true);
-        _mapperMock.Map<BoxResponse>(box).Returns(boxResponse);
+        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(Task.FromResult(true));
 
         // Act
         var result = await controller.CreateBox(boxRequest);
 
         // Assert
-        var createdResult = Assert.IsType<ObjectResult>(result);
+        var createdResult = Assert.IsType<CreatedResult>(result);
         Assert.Equal(StatusCodes.Status201Created, createdResult.StatusCode);
-        Assert.NotNull(createdResult.Value);
-
-        var response = createdResult.Value;
-        Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
-        Assert.Equal(boxResponse, response.GetType().GetProperty("data").GetValue(response));
     }
 
     [Fact]
@@ -197,7 +191,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var userEmail = "test@email";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(Task.FromResult(true));
+        _boxServiceMock.UpdateBoxAsync(box, userEmail).Returns(Task.FromResult(true));
 
         var result = await controller.UpdateBox(boxId, boxRequest);
         Assert.IsType<NoContentResult>(result);

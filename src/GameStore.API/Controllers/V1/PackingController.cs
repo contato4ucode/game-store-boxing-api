@@ -1,9 +1,8 @@
-﻿using GameStore.Domain.DTOs;
+﻿using Asp.Versioning;
+using GameStore.Domain.Interfaces;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
-using GameStore.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -29,19 +28,19 @@ public class PackingController : MainController
             return CustomResponse(ModelState);
 
         return await HandleRequestAsync(
-            async () =>
+        async () =>
+        {
+            var result = await _packingService.ProcessOrderAsync(orderId);
+            return CustomResponse(result);
+        },
+        ex =>
+        {
+            HandleException(ex);
+            return StatusCode(500, new Dictionary<string, object>
             {
-                var result = await _packingService.ProcessOrderAsync(orderId);
-                return CustomResponse(result);
-            },
-            ex =>
-            {
-                HandleException(ex);
-                return StatusCode(500, new
-                {
-                    success = false,
-                    errors = new List<string> { "An unexpected error occurred." }
-                });
+            { "success", false },
+            { "errors", new List<string> { "An unexpected error occurred." } }
             });
+        });
     }
 }
