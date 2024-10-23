@@ -2,6 +2,7 @@
 using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Controllers.V1;
+using GameStore.Domain.Common;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -84,23 +85,65 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
     public async Task GetAllProducts_ShouldReturnAllProducts()
     {
         // Arrange
-        var products = new List<Product> { new Product() };
-        var productResponses = new List<ProductResponse> { new ProductResponse() };
-        var cacheKey = "ProductList:All";
+        var products = new List<Product>
+    {
+        new Product("Product 1", 10, 10, 10, 1.5, 100),
+        new Product("Product 2", 5, 5, 5, 0.5, 50)
+    };
 
-        _redisCacheServiceMock.GetCacheValueAsync<IEnumerable<ProductResponse>>(cacheKey).Returns((IEnumerable<ProductResponse>)null);
+        var productResponses = products.Select(p => new ProductResponse
+        {
+            Name = p.Name,
+            Height = p.Height,
+            Width = p.Width,
+            Length = p.Length,
+            Weight = p.Weight,
+            Price = p.Price
+        }).ToList();
+
+        var cacheKey = "ProductList:Page:1:PageSize:20";
+
+        var paginatedResponse = new PaginatedResponse<ProductResponse>(
+            productResponses,
+            count: productResponses.Count,
+            pageNumber: 1,
+            pageSize: 20
+        );
+
+        _redisCacheServiceMock
+            .GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey)
+            .Returns((PaginatedResponse<ProductResponse>)null);
+
         _productServiceMock.GetAllAsync().Returns(products);
         _mapperMock.Map<IEnumerable<ProductResponse>>(products).Returns(productResponses);
 
         // Act
         var result = await controller.GetAllProducts(1, 20);
-        var okResult = Assert.IsType<OkObjectResult>(result);
 
         // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(okResult.Value);
+
         var response = okResult.Value;
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
-        Assert.Equal(productResponses, response.GetType().GetProperty("data").GetValue(response));
+
+        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<ProductResponse>;
+        Assert.NotNull(data);
+        Assert.Equal(paginatedResponse.Items, data.Items);
+
+        await _redisCacheServiceMock.Received(1)
+            .GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey);
+
+        await _redisCacheServiceMock.Received(1)
+            .SetCacheValueAsync(
+                cacheKey,
+                Arg.Is<PaginatedResponse<ProductResponse>>(p =>
+                    p.TotalItems == paginatedResponse.TotalItems &&
+                    p.PageNumber == paginatedResponse.PageNumber &&
+                    p.PageSize == paginatedResponse.PageSize &&
+                    p.Items.SequenceEqual(paginatedResponse.Items)
+                )
+            );
     }
 
     [Fact]

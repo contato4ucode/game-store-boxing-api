@@ -2,6 +2,7 @@
 using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Controllers.V1;
+using GameStore.Domain.Common;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -96,25 +97,53 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     [Fact]
     public async Task GetAllBoxes_ShouldReturnBoxes_WhenBoxesExist()
     {
+        // Arrange
         var boxes = new List<Box> { new Box("Box 1", 10, 10, 10) };
-        var boxResponses = new List<BoxResponse> { new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 } };
-        var cacheKey = "BoxList:All";
+        var boxResponses = new List<BoxResponse>
+    {
+        new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 }
+    };
+        var cacheKey = "BoxList:Page:1:PageSize:20";
 
-        _redisCacheServiceMock.GetCacheValueAsync<IEnumerable<BoxResponse>>(cacheKey).Returns((IEnumerable<BoxResponse>)null);
+        var paginatedResponse = new PaginatedResponse<BoxResponse>(
+            boxResponses,
+            count: boxResponses.Count,
+            pageNumber: 1,
+            pageSize: 20
+        );
+
+        _redisCacheServiceMock
+            .GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey)
+            .Returns((PaginatedResponse<BoxResponse>)null);
+
         _boxServiceMock.GetAllAsync().Returns(Task.FromResult((IEnumerable<Box>)boxes));
         _mapperMock.Map<IEnumerable<BoxResponse>>(boxes).Returns(boxResponses);
 
+        // Act
         var result = await controller.GetAllBoxes(1, 20);
-        var okResult = Assert.IsType<OkObjectResult>(result);
 
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.NotNull(okResult.Value);
 
         var response = okResult.Value;
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
-        Assert.Equal(boxResponses, response.GetType().GetProperty("data").GetValue(response) as IEnumerable<BoxResponse>);
 
-        await _redisCacheServiceMock.Received(1).GetCacheValueAsync<IEnumerable<BoxResponse>>(cacheKey);
-        await _redisCacheServiceMock.Received(1).SetCacheValueAsync(cacheKey, boxResponses);
+        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<BoxResponse>;
+        Assert.NotNull(data);
+        Assert.Equal(paginatedResponse.Items, data.Items);
+
+        await _redisCacheServiceMock.Received(1)
+            .GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey);
+
+        await _redisCacheServiceMock.Received(1)
+            .SetCacheValueAsync(cacheKey,
+                Arg.Is<PaginatedResponse<BoxResponse>>(p =>
+                    p.TotalItems == paginatedResponse.TotalItems &&
+                    p.PageNumber == paginatedResponse.PageNumber &&
+                    p.PageSize == paginatedResponse.PageSize &&
+                    p.Items.SequenceEqual(paginatedResponse.Items)
+                ));
     }
 
     [Fact]
@@ -181,6 +210,8 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var boxId = Guid.NewGuid();
         var userEmail = "test@email";
 
+        _userMock.GetUserEmail().Returns(userEmail);
+
         _boxServiceMock.SoftDeleteBoxAsync(boxId, userEmail).Returns(Task.FromResult(true));
 
         // Act
@@ -188,6 +219,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
 
         // Assert
         Assert.IsType<NoContentResult>(result);
+
         await _boxServiceMock.Received(1).SoftDeleteBoxAsync(boxId, userEmail);
     }
 }
