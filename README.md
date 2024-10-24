@@ -59,6 +59,8 @@ The output is a JSON response listing the boxes used for each order and the prod
    docker-compose up --build
    ```
 
+   or select the docker-compose option on the Startup Item on Visual Studio and run it
+
 
 3. Apply Database Migrations (Windows/PowerShell):
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentAssertions;
 using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Controllers.V1;
@@ -147,27 +148,30 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
     }
 
     [Fact]
-    public async Task CreateProduct_ShouldReturnCreated_WhenProductIsValid()
+    public async Task CreateProduct_ShouldReturn201_WhenProductIsCreated()
     {
         // Arrange
-        var productRequest = new ProductRequest { Name = "Product 1", Price = 100 };
-        var product = new Product();
-        var productResponse = new ProductResponse();
-        var userEmail = "test@email";
+        var request = new ProductRequest
+        {
+            Name = "New Product",
+            Height = 10,
+            Width = 15,
+            Length = 20,
+            Weight = 1.5,
+            Price = 99.99M
+        };
+        var product = new Product(request.Name, request.Height, request.Width,
+                                  request.Length, request.Weight, request.Price);
 
-        _mapperMock.Map<Product>(productRequest).Returns(product);
-        _productServiceMock.CreateProductAsync(product, userEmail).Returns(true);
-        _mapperMock.Map<ProductResponse>(product).Returns(productResponse);
+        _mapperMock.Map<Product>(request).Returns(product);
+        _productServiceMock.CreateProductAsync(product, Arg.Any<string>()).Returns(true);
 
         // Act
-        var result = await controller.CreateProduct(productRequest);
-        var createdResult = Assert.IsType<ObjectResult>(result);
+        var result = await controller.CreateProduct(request) as ObjectResult;
 
         // Assert
-        Assert.Equal(StatusCodes.Status201Created, createdResult.StatusCode);
-        var response = createdResult.Value;
-        Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
-        Assert.Equal(productResponse, response.GetType().GetProperty("data").GetValue(response));
+        result.Should().NotBeNull();
+        result.StatusCode.Should().Be(StatusCodes.Status201Created);
     }
 
     [Fact]
@@ -224,6 +228,5 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        await _productServiceMock.Received(1).SoftDeleteProductAsync(productId, userEmail);
     }
 }

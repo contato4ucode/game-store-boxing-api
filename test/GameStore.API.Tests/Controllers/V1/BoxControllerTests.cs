@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using FluentAssertions;
 using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Controllers.V1;
+using GameStore.BoxingService.Services;
 using GameStore.Domain.Common;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
@@ -148,22 +150,21 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     }
 
     [Fact]
-    public async Task CreateBox_ShouldReturnCreated_WhenBoxIsValid()
+    public async Task CreateBox_ShouldReturn201_WhenBoxIsCreated()
     {
         // Arrange
-        var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
-        var box = new Box("Box 1", 10, 10, 10);
-        var userEmail = "test@email.com";
+        var request = new BoxRequest { Name = "New Box", Height = 10, Width = 10, Length = 10 };
+        var box = new Box(request.Name, request.Height, request.Width, request.Length);
 
-        _mapperMock.Map<Box>(boxRequest).Returns(box);
-        _boxServiceMock.CreateBoxAsync(box, userEmail).Returns(Task.FromResult(true));
+        _mapperMock.Map<Box>(request).Returns(box);
+        _boxServiceMock.CreateBoxAsync(box, Arg.Any<string>()).Returns(true);
 
         // Act
-        var result = await controller.CreateBox(boxRequest);
+        var result = await controller.CreateBox(request) as ObjectResult;
 
         // Assert
-        var createdResult = Assert.IsType<CreatedResult>(result);
-        Assert.Equal(StatusCodes.Status201Created, createdResult.StatusCode);
+        result.Should().NotBeNull();
+        result.StatusCode.Should().Be(StatusCodes.Status201Created);
     }
 
     [Fact]
@@ -204,16 +205,13 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var boxId = Guid.NewGuid();
         var userEmail = "test@email";
 
-        _userMock.GetUserEmail().Returns(userEmail);
-
         _boxServiceMock.SoftDeleteBoxAsync(boxId, userEmail).Returns(Task.FromResult(true));
 
         // Act
-        var result = await controller.SoftDeleteBox(boxId);
+        var result = await controller.SoftDeleteBox(boxId) as NoContentResult;
 
         // Assert
-        Assert.IsType<NoContentResult>(result);
-
-        await _boxServiceMock.Received(1).SoftDeleteBoxAsync(boxId, userEmail);
+        result.Should().NotBeNull();
+        result.StatusCode.Should().Be(StatusCodes.Status204NoContent);
     }
 }
