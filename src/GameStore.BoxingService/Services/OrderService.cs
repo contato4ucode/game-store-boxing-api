@@ -1,8 +1,9 @@
-﻿using FluentValidation;
-using GameStore.Domain.Interfaces.Notifications;
+﻿using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Notifications;
 using GameStore.SharedServices.Services;
 
 namespace GameStore.BoxingService.Services;
@@ -10,45 +11,11 @@ namespace GameStore.BoxingService.Services;
 public class OrderService : BaseService, IOrderService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<Order> _orderValidator;
 
-    public OrderService(IUnitOfWork unitOfWork, INotifier notifier, IValidator<Order> orderValidator)
+    public OrderService(IUnitOfWork unitOfWork, INotifier notifier)
         : base(notifier)
     {
         _unitOfWork = unitOfWork;
-        _orderValidator = orderValidator;
-    }
-
-    public async Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds, string userEmail)
-    {
-        try
-        {
-            await _unitOfWork.BeginTransactionAsync();
-
-            var products = await LoadProductsByIdsAsync(productIds);
-            var order = new Order(customerId, DateTime.UtcNow, products);
-
-            var validationResult = await _orderValidator.ValidateAsync(order);
-            if (!validationResult.IsValid)
-            {
-                _notifier.NotifyValidationErrors(validationResult);
-                return null;
-            }
-
-            order.CreatedByUser = userEmail;
-
-            await _unitOfWork.Orders.Add(order);
-            await _unitOfWork.SaveAsync();
-            await _unitOfWork.CommitTransactionAsync();
-
-            return order;
-        }
-        catch (Exception ex)
-        {
-            await _unitOfWork.RollbackTransactionAsync();
-            HandleException(ex);
-            return null;
-        }
     }
 
     public async Task<Order?> GetOrderByIdAsync(Guid orderId)
@@ -77,13 +44,63 @@ public class OrderService : BaseService, IOrderService
         }
     }
 
+    public async Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds, string userEmail, DateTime? orderDate = null)
+    {
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            var products = await LoadProductsByIdsAsync(productIds);
+
+            var finalOrderDate = orderDate ?? DateTime.UtcNow;
+
+            var order = new Order(customerId, finalOrderDate, products);
+
+            var validator = new OrderValidator(_unitOfWork);
+            validator.ConfigureRulesForCreate();
+
+            var validationResult = await validator.ValidateAsync(order);
+
+            if (!validationResult.IsValid)
+            {
+                _notifier.NotifyValidationErrors(validationResult);
+                await _unitOfWork.RollbackTransactionAsync();
+                return null;
+            }
+
+            order.CreatedByUser = userEmail;
+
+            await _unitOfWork.Orders.Add(order);
+            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitTransactionAsync();
+
+            return order;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            HandleException(ex);
+            return null;
+        }
+    }
+
     public async Task<bool> UpdateOrderAsync(Order order, string userEmail)
     {
         try
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var validationResult = await _orderValidator.ValidateAsync(order);
+            var existingOrder = await _unitOfWork.Orders.GetById(order.Id);
+            if (existingOrder ==  null)
+            {
+                _notifier.Handle("Order not found", NotificationType.Error);
+                return false;
+            }
+
+            var validator = new OrderValidator(_unitOfWork);
+            validator.ConfigureRulesForUpdate(existingOrder);
+
+            var validationResult = await validator.ValidateAsync(order);
             if (!validationResult.IsValid)
             {
                 _notifier.NotifyValidationErrors(validationResult);

@@ -4,6 +4,7 @@ using GameStore.BoxingService.Services;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.Validations;
 using NSubstitute;
 
 namespace GameStore.BoxingService.Tests.Services;
@@ -12,15 +13,13 @@ public class ProductServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly INotifier _notifier;
-    private readonly IValidator<Product> _productValidator;
     private readonly ProductService _productService;
 
     public ProductServiceTests()
     {
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _notifier = Substitute.For<INotifier>();
-        _productValidator = Substitute.For<IValidator<Product>>();
-        _productService = new ProductService(_unitOfWork, _notifier, _productValidator);
+        _productService = new ProductService(_unitOfWork, _notifier);
     }
 
     [Fact]
@@ -57,10 +56,10 @@ public class ProductServiceTests
     {
         // Arrange
         var products = new List<Product>
-            {
-                new Product("Product 1", 10, 10, 10, 1.0, 50.0m),
-                new Product("Product 2", 20, 20, 20, 2.0, 100.0m)
-            };
+        {
+            new Product("Product 1", 10, 10, 10, 1.0, 50.0m),
+            new Product("Product 2", 20, 20, 20, 2.0, 100.0m)
+        };
         _unitOfWork.Products.GetAll().Returns(products);
 
         // Act
@@ -77,7 +76,10 @@ public class ProductServiceTests
         // Arrange
         var product = new Product("Valid Product", 10, 10, 10, 2.0, 100.0m);
         var userEmail = "test@email";
-        _productValidator.ValidateAsync(product).Returns(new ValidationResult());
+
+        var validator = new ProductValidator(_unitOfWork);
+        validator.ConfigureRulesForCreate();
+        var validationResult = await validator.ValidateAsync(product);
 
         // Act
         var result = await _productService.CreateProductAsync(product, userEmail);
@@ -92,21 +94,31 @@ public class ProductServiceTests
     public async Task CreateProductAsync_Should_Return_False_When_Invalid()
     {
         // Arrange
-        var product = new Product("Invalid Product", 10, 10, 10, 2.0, 100.0m);
+        var product = new Product("", 10, 10, 10, 2.0, 100.0m);
         var userEmail = "test@email";
-        var validationResult = new ValidationResult(new List<ValidationFailure>
-            {
-                new ValidationFailure("Name", "Product name is required.")
-            });
+        var expectedErrorMessage = "Product name cannot be empty.";
 
-        _productValidator.ValidateAsync(product).Returns(validationResult);
+        var validator = new ProductValidator(_unitOfWork);
+        validator.ConfigureRulesForCreate();
+
+        var validationResult = new ValidationResult(new List<ValidationFailure>
+        {
+            new ValidationFailure("Name", expectedErrorMessage)
+        });
+
+        _notifier.When(x => x.NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)))).Do(_ => { });
+
+        var productService = new ProductService(_unitOfWork, _notifier);
 
         // Act
-        var result = await _productService.CreateProductAsync(product, userEmail);
+        var result = await productService.CreateProductAsync(product, userEmail);
 
         // Assert
         Assert.False(result);
-        _notifier.Received(1).NotifyValidationErrors(validationResult);
+        _notifier.Received(1).NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)));
+        await _unitOfWork.Products.DidNotReceive().Add(product);
     }
 
     [Fact]
@@ -115,7 +127,12 @@ public class ProductServiceTests
         // Arrange
         var product = new Product("Updated Product", 10, 10, 10, 2.0, 100.0m);
         var userEmail = "test@email";
-        _productValidator.ValidateAsync(product).Returns(new ValidationResult());
+
+        _unitOfWork.Products.GetById(product.Id).Returns(product);
+
+        var validator = new ProductValidator(_unitOfWork);
+        validator.ConfigureRulesForUpdate(product);
+        var validationResult = await validator.ValidateAsync(product);
 
         // Act
         var result = await _productService.UpdateProductAsync(product, userEmail);
@@ -130,21 +147,33 @@ public class ProductServiceTests
     public async Task UpdateProductAsync_Should_Return_False_When_Invalid()
     {
         // Arrange
-        var product = new Product("Invalid Product", 10, 10, 10, 2.0, 100.0m);
+        var product = new Product("Invalid Product", 10, 10, 10, 2.0, 0.0m);
         var userEmail = "test@email";
-        var validationResult = new ValidationResult(new List<ValidationFailure>
-            {
-                new ValidationFailure("Price", "Price must be greater than zero.")
-            });
+        var expectedErrorMessage = "Price must be greater than 0.";
 
-        _productValidator.ValidateAsync(product).Returns(validationResult);
+        _unitOfWork.Products.GetById(product.Id).Returns(product);
+
+        var validator = new ProductValidator(_unitOfWork);
+        validator.ConfigureRulesForUpdate(product);
+
+        var validationResult = new ValidationResult(new List<ValidationFailure>
+        {
+            new ValidationFailure("Price", expectedErrorMessage)
+        });
+
+        _notifier.When(x => x.NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)))).Do(_ => { });
+
+        _notifier.When(x => x.NotifyValidationErrors(validationResult)).Do(_ => { });
 
         // Act
         var result = await _productService.UpdateProductAsync(product, userEmail);
 
         // Assert
-        Assert.False(result);
-        _notifier.Received(1).NotifyValidationErrors(validationResult);
+        Assert.False(result, "A atualização deveria falhar devido a um preço inválido.");
+        _notifier.Received(1).NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)));
+        await _unitOfWork.Products.DidNotReceive().Update(product);
     }
 
     [Fact]
@@ -154,6 +183,7 @@ public class ProductServiceTests
         var productId = Guid.NewGuid();
         var product = new Product("Product to Delete", 10, 10, 10, 1.0, 50.0m);
         var userEmail = "test@email";
+
         _unitOfWork.Products.GetById(productId).Returns(product);
 
         // Act
@@ -172,6 +202,7 @@ public class ProductServiceTests
         // Arrange
         var productId = Guid.NewGuid();
         var userEmail = "test@email";
+
         _unitOfWork.Products.GetById(productId).Returns((Product)null);
 
         // Act

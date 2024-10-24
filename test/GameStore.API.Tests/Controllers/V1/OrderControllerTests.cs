@@ -162,12 +162,22 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     public async Task CreateOrder_ShouldReturnCreated_WhenOrderIsValid()
     {
         // Arrange
-        var orderRequest = new OrderRequest { CustomerId = Guid.NewGuid(), ProductIds = new List<Guid> { Guid.NewGuid() } };
-        var order = new Order();
+        var orderDate = DateTime.UtcNow.AddDays(-1);
+        var orderRequest = new OrderRequest
+        {
+            CustomerId = Guid.NewGuid(),
+            ProductIds = new List<Guid> { Guid.NewGuid() },
+            OrderDate = orderDate
+        };
+
+        var order = new Order(orderRequest.CustomerId, orderDate, new List<Product>());
         var orderResponse = new OrderResponse();
         var userEmail = "test@email";
 
-        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail).Returns(order);
+        _orderServiceMock
+            .CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail, orderRequest.OrderDate)
+            .Returns(order);
+
         _mapperMock.Map<OrderResponse>(order).Returns(orderResponse);
 
         // Act
@@ -186,8 +196,17 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     {
         // Arrange
         var userEmail = "test@email";
-        var orderRequest = new OrderRequest { CustomerId = Guid.NewGuid(), ProductIds = new List<Guid> { Guid.NewGuid() } };
-        _orderServiceMock.CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail).Returns((Order)null);
+        var orderDate = DateTime.UtcNow.AddDays(1);
+        var orderRequest = new OrderRequest
+        {
+            CustomerId = Guid.NewGuid(),
+            ProductIds = new List<Guid> { Guid.NewGuid() },
+            OrderDate = orderDate
+        };
+
+        _orderServiceMock
+            .CreateOrderAsync(orderRequest.CustomerId, orderRequest.ProductIds, userEmail, orderRequest.OrderDate)
+            .Returns((Order)null);
 
         // Act
         var result = await controller.CreateOrder(orderRequest);

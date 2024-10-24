@@ -1,8 +1,9 @@
-﻿using FluentValidation;
-using GameStore.Domain.Interfaces.Notifications;
+﻿using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Notifications;
 using GameStore.SharedServices.Services;
 
 namespace GameStore.BoxingService.Services;
@@ -10,13 +11,11 @@ namespace GameStore.BoxingService.Services;
 public class ProductService : BaseService, IProductService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<Product> _productValidator;
 
-    public ProductService(IUnitOfWork unitOfWork, INotifier notifier, IValidator<Product> productValidator)
+    public ProductService(IUnitOfWork unitOfWork, INotifier notifier)
         : base(notifier)
     {
         _unitOfWork = unitOfWork;
-        _productValidator = productValidator;
     }
 
     public async Task<Product?> GetByIdAsync(Guid productId)
@@ -51,7 +50,10 @@ public class ProductService : BaseService, IProductService
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var validationResult = await _productValidator.ValidateAsync(product);
+            var validator = new ProductValidator(_unitOfWork);
+            validator.ConfigureRulesForCreate();
+
+            var validationResult = await validator.ValidateAsync(product);
             if (!validationResult.IsValid)
             {
                 _notifier.NotifyValidationErrors(validationResult);
@@ -80,7 +82,17 @@ public class ProductService : BaseService, IProductService
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var validationResult = await _productValidator.ValidateAsync(product);
+            var existingProduct = await _unitOfWork.Products.GetById(product.Id);
+            if (existingProduct == null)
+            {
+                _notifier.Handle("Product not found", NotificationType.Error);
+                return false;
+            }
+
+            var validator = new ProductValidator(_unitOfWork);
+            validator.ConfigureRulesForUpdate(existingProduct);
+
+            var validationResult = await validator.ValidateAsync(product);
             if (!validationResult.IsValid)
             {
                 _notifier.NotifyValidationErrors(validationResult);

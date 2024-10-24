@@ -9,4 +9,6 @@ public class OrderRequest
 
     [Required]
     public List<Guid> ProductIds { get; set; } = new();
+
+    public DateTime? OrderDate { get; set; }
 }

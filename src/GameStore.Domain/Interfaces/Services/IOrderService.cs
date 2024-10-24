@@ -4,7 +4,7 @@ namespace GameStore.Domain.Interfaces.Services;
 
 public interface IOrderService
 {
-    Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds, string userEmail);
+    Task<Order?> CreateOrderAsync(Guid customerId, List<Guid> productIds, string userEmail, DateTime? orderDate);
     Task<IEnumerable<Order>> GetAllOrdersAsync();
     Task<Order?> GetOrderByIdAsync(Guid orderId);
     Task<bool> UpdateOrderAsync(Order order, string userEmail);

@@ -99,7 +99,12 @@ public class OrderController : MainController
         return await HandleRequestAsync(
             async () =>
             {
-                var order = await _orderService.CreateOrderAsync(request.CustomerId, request.ProductIds, UserEmail);
+                var order = await _orderService.CreateOrderAsync(
+                    request.CustomerId,
+                    request.ProductIds,
+                    UserEmail,
+                    request.OrderDate);
+
                 if (order == null)
                 {
                     return CustomResponse("Order creation failed", StatusCodes.Status400BadRequest);

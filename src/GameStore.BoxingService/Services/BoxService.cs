@@ -1,8 +1,9 @@
-﻿using FluentValidation;
-using GameStore.Domain.Interfaces.Notifications;
+﻿using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Notifications;
 using GameStore.SharedServices.Services;
 
 namespace GameStore.BoxingService.Services;
@@ -10,13 +11,11 @@ namespace GameStore.BoxingService.Services;
 public class BoxService : BaseService, IBoxService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<Box> _boxValidator;
 
-    public BoxService(IUnitOfWork unitOfWork, INotifier notifier, IValidator<Box> boxValidator)
+    public BoxService(IUnitOfWork unitOfWork, INotifier notifier)
         : base(notifier)
     {
         _unitOfWork = unitOfWork;
-        _boxValidator = boxValidator;
     }
 
     public async Task<Box?> GetByIdAsync(Guid boxId)
@@ -51,7 +50,10 @@ public class BoxService : BaseService, IBoxService
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var validationResult = await _boxValidator.ValidateAsync(box);
+            var validator = new BoxValidator(_unitOfWork);
+            validator.ConfigureRulesForCreate();
+
+            var validationResult = await validator.ValidateAsync(box);
             if (!validationResult.IsValid)
             {
                 _notifier.NotifyValidationErrors(validationResult);
@@ -80,7 +82,17 @@ public class BoxService : BaseService, IBoxService
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            var validationResult = await _boxValidator.ValidateAsync(box);
+            var existingBox = await _unitOfWork.Boxes.GetById(box.Id);
+            if (existingBox == null)
+            {
+                _notifier.Handle("Box not found", NotificationType.Error);
+                return false;
+            }
+
+            var validator = new BoxValidator(_unitOfWork);
+            validator.ConfigureRulesForUpdate(existingBox);
+
+            var validationResult = await validator.ValidateAsync(box);
             if (!validationResult.IsValid)
             {
                 _notifier.NotifyValidationErrors(validationResult);

@@ -4,6 +4,7 @@ using GameStore.BoxingService.Services;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.Validations;
 using NSubstitute;
 
 namespace GameStore.BoxingService.Tests.Services;
@@ -12,15 +13,13 @@ public class BoxServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly INotifier _notifier;
-    private readonly IValidator<Box> _boxValidator;
     private readonly BoxService _boxService;
 
     public BoxServiceTests()
     {
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _notifier = Substitute.For<INotifier>();
-        _boxValidator = Substitute.For<IValidator<Box>>();
-        _boxService = new BoxService(_unitOfWork, _notifier, _boxValidator);
+        _boxService = new BoxService(_unitOfWork, _notifier);
     }
 
     [Fact]
@@ -78,7 +77,13 @@ public class BoxServiceTests
         // Arrange
         var box = new Box("Box 1", 30, 40, 80);
         var userEmail = "test@email";
-        _boxValidator.ValidateAsync(box).Returns(new ValidationResult());
+        var validator = new BoxValidator(_unitOfWork);
+        validator.ConfigureRulesForCreate();
+
+        var validationResult = await validator.ValidateAsync(box);
+
+        _unitOfWork.Boxes.Add(box).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.FromResult(1));
 
         // Act
         var result = await _boxService.CreateBoxAsync(box, userEmail);
@@ -95,18 +100,26 @@ public class BoxServiceTests
         // Arrange
         var box = new Box("Invalid Box", -10, 40, 80);
         var userEmail = "test@email";
+        var expectedErrorMessage = "Height must be greater than 0.";
+
         var validationResult = new ValidationResult(new List<ValidationFailure>
         {
-            new ValidationFailure("Height", "Height must be positive.")
+            new ValidationFailure("Height", expectedErrorMessage)
         });
-        _boxValidator.ValidateAsync(box).Returns(validationResult);
+
+        var validator = new BoxValidator(_unitOfWork);
+        validator.ConfigureRulesForCreate();
+
+        _notifier.When(x => x.NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)))).Do(_ => { });
 
         // Act
         var result = await _boxService.CreateBoxAsync(box, userEmail);
 
         // Assert
         Assert.False(result);
-        _notifier.Received(1).NotifyValidationErrors(validationResult);
+        _notifier.Received(1).NotifyValidationErrors(Arg.Is<ValidationResult>(v =>
+            v.Errors.Any(e => e.ErrorMessage == expectedErrorMessage)));
         await _unitOfWork.Boxes.DidNotReceive().Add(box);
     }
 
@@ -114,15 +127,22 @@ public class BoxServiceTests
     public async Task UpdateBoxAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var box = new Box("Box 1", 30, 40, 80);
+        var box = new Box("Box 1", 30, 40, 80) { Id = Guid.NewGuid() };
         var userEmail = "test@email";
-        _boxValidator.ValidateAsync(box).Returns(new ValidationResult());
+
+        _unitOfWork.Boxes.GetById(box.Id).Returns(box);
+
+        var validator = new BoxValidator(_unitOfWork);
+        validator.ConfigureRulesForUpdate(box);
+
+        var validationResult = new ValidationResult();
+        _notifier.When(x => x.NotifyValidationErrors(Arg.Any<ValidationResult>())).Do(_ => { });
 
         // Act
         var result = await _boxService.UpdateBoxAsync(box, userEmail);
 
         // Assert
-        Assert.True(result);
+        Assert.True(result, "Expected the update operation to return true.");
         await _unitOfWork.Boxes.Received(1).Update(box);
         await _unitOfWork.Received(1).SaveAsync();
     }
@@ -134,6 +154,7 @@ public class BoxServiceTests
         var boxId = Guid.NewGuid();
         var box = new Box("Box 1", 30, 40, 80);
         var userEmail = "test@email";
+
         _unitOfWork.Boxes.GetById(boxId).Returns(box);
 
         // Act
