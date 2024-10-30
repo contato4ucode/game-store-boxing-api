@@ -1,6 +1,6 @@
-@GameStore.API_HostAddress = http://localhost:5233
+@GameStore.API_HostAddress = http://localhost:5000
 
-GET {{GameStore.API_HostAddress}}/weatherforecast/
+GET {{GameStore.API_HostAddress}}/products/
 Accept: application/json
 
 ###

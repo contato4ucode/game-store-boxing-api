@@ -3,14 +3,13 @@ version: '3.8'
 services:
   gamestore-api:
     image: gamestore-api
+    container_name: gamestore.api
     build:
       context: .
       dockerfile: src/GameStore.API/Dockerfile
     ports:
-      - "8081:5000"
-      - "8080:5000"
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
+      - "5000:5000"
+      - "5001:5001"
     depends_on:
       - postgres
       - redis
@@ -18,6 +17,7 @@ services:
 
   postgres:
     image: postgres:latest
+    container_name: gamestore.database
     restart: always
     environment:
       POSTGRES_DB: game_store
@@ -25,9 +25,12 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
   redis:
     image: redis:latest
+    container_name: gamestore.cache
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
@@ -38,6 +41,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: gamestore.messaging
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
