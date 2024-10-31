@@ -113,7 +113,7 @@ Following these steps, you should be able to apply migrations correctly, connect
 
    Once the containers are up and running, access the Swagger documentation at:
 
-   [http://localhost:8081/swagger](http://localhost:8081/swagger)
+   [https://localhost:5001/swagger](https://localhost:5001/swagger)
 
 ## Testing
 
