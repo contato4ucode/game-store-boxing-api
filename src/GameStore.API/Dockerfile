@@ -20,9 +20,8 @@ RUN dotnet restore "GameStore.API/GameStore.API.csproj"
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-COPY . .
-
 WORKDIR "/src/GameStore.API"
+COPY . .
 
 RUN dotnet build "GameStore.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

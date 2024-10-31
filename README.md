@@ -64,23 +64,23 @@ The output is a JSON response listing the boxes used for each order and the prod
 
 3. Apply Database Migrations (Windows/PowerShell):
 
-Antes de aplicar as migrações, certifique-se de que o **container PostgreSQL** está em execução e acessível.
+Before applying migrations, ensure the **PostgreSQL container** is running and accessible.
 
-### Passos:
+### Steps:
 
-1. **Obter o IP do WSL2 (se necessário):**
+1. **Get the WSL2 IP (if necessary):**
 
-   Se você estiver usando o WSL2, execute o seguinte comando para descobrir o IP do sistema WSL:
+   If you are using WSL2, run the following command to find out the IP of the WSL system:
 
    ```powershell
    wsl hostname -I
    ```
 
-   Use o IP retornado como `Host` na string de conexão abaixo.
+   Use the returned IP as the `Host` in the connection string below.
 
-2. **Executar as migrações usando PowerShell:**
+2. **Run migrations using PowerShell:**
 
-   No PowerShell, defina a variável de ambiente para a **string de conexão** e aplique as migrações com os seguintes comandos:
+   In PowerShell, set the environment variable for the **connection string** and apply the migrations with the following commands:
 
    ```powershell
    $Env:ConnectionStrings__DefaultConnection = "Host=<ip_wsl2>;Port=5432;Database=gamestore;Username=postgres;Password=password"
@@ -88,26 +88,26 @@ Antes de aplicar as migrações, certifique-se de que o **container PostgreSQL** e
    dotnet ef database update --context ApplicationDbContext --project ./src/GameStore.Infrastructure/GameStore.Infrastructure.csproj --startup-project ./src/GameStore.API/GameStore.API.csproj
    ```
 
-   ou
+   or
 
    ```powershell
    dotnet ef database update --context DataContext --connection "Host=<ip_wsl2>;Port=5432;Database=game_store;Username=postgres;Password=password" --project ./src/GameStore.Infrastructure/GameStore.Infrastructure.csproj --startup-project ./src/GameStore.API/GameStore.API.csproj  
    dotnet ef database update --context ApplicationDbContext --connection "Host=<ip_wsl2>;Port=5432;Database=game_store;Username=postgres;Password=password" --project ./src/GameStore.Infrastructure/GameStore.Infrastructure.csproj --startup-project ./src/GameStore.API/GameStore.API.csproj
    ```
 
-   Substitua `<ip_wsl2>` pelo IP retornado no comando anterior.
+   Replace `<ip_wsl2>` with the IP returned from the previous command.
 
-### Nota:
+### Note:
 
-- Se o **PostgreSQL** e a aplicação estiverem na **mesma rede Docker**, você pode tentar usar `localhost` em vez do IP do WSL2.
-- Certifique-se de que a porta **5432** está liberada e o banco de dados está acessível.
-- Se necessário, permita a porta no firewall do Windows com o comando abaixo:
+- If **PostgreSQL** and the application are on the **same Docker network**, you can try using `localhost` instead of the WSL2 IP.
+- Ensure that port **5432** is open and the database is accessible.
+- If necessary, allow the port in the Windows firewall with the following command:
 
    ```powershell
    New-NetFirewallRule -DisplayName "PostgreSQL 5432" -Direction Inbound -LocalPort 5432 -Protocol TCP -Action Allow
    ```
 
-Com esses passos, você conseguirá aplicar as migrações corretamente, conectando-se ao banco de dados dentro do container.
+Following these steps, you should be able to apply migrations correctly, connecting to the database within the container.
 
 4. **Access the API:**
 
