@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using FluentAssertions;
-using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
 using GameStore.API.Controllers.V1;
 using GameStore.BoxingService.Services;
 using GameStore.Domain.Common;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -59,8 +60,10 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     public async Task GetBoxById_ShouldReturnBox_WhenBoxExists()
     {
         var boxId = Guid.NewGuid();
-        var box = new Box("Box 1", 10, 10, 10);
-        var boxResponse = new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
+        var dimensions = new Dimensions(10, 10, 10);
+
+        var box = new Box("Box 1", dimensions);
+        var boxResponse = new BoxResponse { Name = "Box 1", Dimensions = dimensions };
         var cacheKey = $"Box:{boxId}";
 
         _redisCacheServiceMock.GetCacheValueAsync<BoxResponse>(cacheKey).Returns((BoxResponse)null);
@@ -101,11 +104,12 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     public async Task GetAllBoxes_ShouldReturnBoxes_WhenBoxesExist()
     {
         // Arrange
-        var boxes = new List<Box> { new Box("Box 1", 10, 10, 10) };
+        var dimensions = new Dimensions(10, 10, 10);
+        var boxes = new List<Box> { new Box("Box 1", dimensions) };
         var boxResponses = new List<BoxResponse>
-    {
-        new BoxResponse { Name = "Box 1", Height = 10, Width = 10, Length = 10 }
-    };
+        {
+            new BoxResponse { Name = "Box 1", Dimensions = dimensions }
+        };
         var cacheKey = "BoxList:Page:1:PageSize:20";
 
         var paginatedResponse = new PaginatedResponse<BoxResponse>(
@@ -153,8 +157,9 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     public async Task CreateBox_ShouldReturn201_WhenBoxIsCreated()
     {
         // Arrange
-        var request = new BoxRequest { Name = "New Box", Height = 10, Width = 10, Length = 10 };
-        var box = new Box(request.Name, request.Height, request.Width, request.Length);
+        var dimensions = new Dimensions(10, 10, 10);
+        var request = new BoxRequest { Name = "New Box", Dimensions = dimensions };
+        var box = new Box(request.Name, request.Dimensions);
 
         _mapperMock.Map<Box>(request).Returns(box);
         _boxServiceMock.CreateBoxAsync(box, Arg.Any<string>()).Returns(true);
@@ -170,8 +175,9 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     [Fact]
     public async Task CreateBox_ShouldReturnBadRequest_WhenCreationFails()
     {
-        var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
-        var box = new Box("Box 1", 10, 10, 10);
+        var dimensions = new Dimensions(10, 10, 10);
+        var boxRequest = new BoxRequest { Name = "Box 1", Dimensions = dimensions };
+        var box = new Box("Box 1", dimensions);
         var userEmail = "test@email";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);
@@ -186,9 +192,10 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
     [Fact]
     public async Task UpdateBox_ShouldReturnNoContent_WhenUpdateIsSuccessful()
     {
-        var boxRequest = new BoxRequest { Name = "Box 1", Height = 10, Width = 10, Length = 10 };
+        var dimensions = new Dimensions(10, 10, 10);
+        var boxRequest = new BoxRequest { Name = "Box 1", Dimensions = dimensions };
         var boxId = Guid.NewGuid();
-        var box = new Box("Box 1", 10, 10, 10) { Id = boxId };
+        var box = new Box("Box 1", dimensions) { Id = boxId };
         var userEmail = "test@email";
 
         _mapperMock.Map<Box>(boxRequest).Returns(box);

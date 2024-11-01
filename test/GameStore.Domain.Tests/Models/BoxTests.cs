@@ -1,4 +1,5 @@
 ﻿using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 
 namespace GameStore.Domain.Tests.Models;
 
@@ -12,22 +13,24 @@ public class BoxTests
         int height = 10;
         int width = 20;
         int length = 30;
+        var dimensions = new Dimensions(height, width, length);
 
         // Act
-        var box = new Box(name, height, width, length);
+        var box = new Box(name, dimensions);
 
         // Assert
         Assert.Equal(name, box.Name);
-        Assert.Equal(height, box.Height);
-        Assert.Equal(width, box.Width);
-        Assert.Equal(length, box.Length);
+        Assert.Equal(dimensions.Height, box.Dimensions.Height);
+        Assert.Equal(dimensions.Width, box.Dimensions.Width);
+        Assert.Equal(dimensions.Length, box.Dimensions.Length);
     }
 
     [Fact]
     public void Volume_ShouldReturnCorrectValue()
     {
         // Arrange
-        var box = new Box("Medium Box", 10, 10, 10);
+        var dimensions = new Dimensions(10, 10, 10);
+        var box = new Box("Medium Box", dimensions);
 
         // Act
         int volume = box.Volume;
@@ -40,7 +43,8 @@ public class BoxTests
     public void ToString_ShouldReturnFormattedString()
     {
         // Arrange
-        var box = new Box("Large Box", 15, 25, 35);
+        var dimensions = new Dimensions(15, 25, 35);
+        var box = new Box("Large Box", dimensions);
 
         // Act
         string result = box.ToString();
@@ -56,10 +60,10 @@ public class BoxTests
         var box = new Box();
 
         // Assert
-        Assert.Null(box.Name);
-        Assert.Equal(0, box.Height);
-        Assert.Equal(0, box.Width);
-        Assert.Equal(0, box.Length);
+        Assert.Equal(string.Empty, box.Name);
+        Assert.Equal(0, box.Dimensions.Height);
+        Assert.Equal(0, box.Dimensions.Width);
+        Assert.Equal(0, box.Dimensions.Length);
     }
 
     [Fact]

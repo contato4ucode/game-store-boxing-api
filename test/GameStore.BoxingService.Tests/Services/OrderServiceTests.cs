@@ -5,6 +5,7 @@ using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Models.ValueObjects;
 using NSubstitute;
 using System.Linq.Expressions;
 
@@ -29,7 +30,7 @@ public class OrderServiceTests
         // Arrange
         var customerId = Guid.NewGuid();
         var productIds = new List<Guid> { Guid.NewGuid() };
-        var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
         var userEmail = "test@email";
         var invalidOrderDate = DateTime.UtcNow.AddDays(1);
 
@@ -62,7 +63,7 @@ public class OrderServiceTests
         var productIds = new List<Guid> { Guid.NewGuid() };
         var products = new List<Product>
         {
-            new Product("Test Product", 10, 10, 10, 2.0, 50.0m)
+            new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m)
         };
         var userEmail = "test@email";
         var customOrderDate = DateTime.UtcNow.AddDays(-1);
@@ -90,7 +91,7 @@ public class OrderServiceTests
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products) { Id = orderId };
 
         _unitOfWork.Orders.GetById(orderId).Returns(order);
@@ -121,7 +122,7 @@ public class OrderServiceTests
     public async Task UpdateOrderAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
         var userEmail = "test@email";
 
@@ -144,7 +145,7 @@ public class OrderServiceTests
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        var products = new List<Product> { new Product("Test Product", 10, 10, 10, 2.0, 50.0m) };
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
         var userEmail = "test@email";
 

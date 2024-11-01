@@ -6,9 +6,7 @@ public class Order : EntityBase
     public DateTime OrderDate { get; private set; }
     public List<Product> Products { get; private set; } = new();
 
-    public Order()
-    {
-    }
+    public Order() { }
 
     public Order(Guid customerId, DateTime orderDate, List<Product> products)
     {
@@ -18,6 +16,11 @@ public class Order : EntityBase
 
         if (!products.Any())
             throw new ArgumentException("An order must contain at least one product.");
+    }
+
+    public void SetProducts(List<Product> products)
+    {
+        Products = products ?? throw new ArgumentNullException(nameof(products));
     }
 
     public decimal TotalPrice => Products.Sum(p => p.Price);

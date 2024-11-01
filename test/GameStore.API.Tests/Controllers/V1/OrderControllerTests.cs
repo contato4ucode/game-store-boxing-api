@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using FluentAssertions;
-using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
 using GameStore.API.Controllers.V1;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -91,13 +92,13 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     {
         // Arrange
         var orders = new List<Order>
-    {
-        new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product>
         {
-            new Product("Product 1", 10, 10, 10, 1.5, 100),
-            new Product("Product 2", 5, 5, 5, 0.5, 50)
-        })
-    };
+            new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product>
+            {
+                new Product("Product 1", new Dimensions(10, 10, 10), 1.5, 100),
+                new Product("Product 2", new Dimensions(5, 5, 5), 0.5, 50)
+            })
+        };
 
         var orderResponses = orders.Select(o => new OrderResponse
         {
@@ -106,9 +107,7 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
             Products = o.Products.Select(p => new ProductResponse
             {
                 Name = p.Name,
-                Height = p.Height,
-                Width = p.Width,
-                Length = p.Length,
+                Dimensions = p.Dimensions,
                 Weight = p.Weight,
                 Price = p.Price
             }).ToList()
@@ -171,10 +170,10 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         };
 
         var products = new List<Product>
-    {
-        new Product("Product 1", 10, 15, 20, 1.5, 100),
-        new Product("Product 2", 5, 10, 10, 0.5, 50)
-    };
+        {
+            new Product("Product 1", new Dimensions(10, 15, 20), 1.5, 100),
+            new Product("Product 2", new Dimensions(5, 10, 10), 0.5, 50)
+        };
 
         var order = new Order(request.CustomerId, request.OrderDate.Value, products);
 
@@ -189,9 +188,7 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
             Products = products.Select(p => new ProductResponse
             {
                 Name = p.Name,
-                Height = p.Height,
-                Width = p.Width,
-                Length = p.Length,
+                Dimensions = p.Dimensions,
                 Weight = p.Weight,
                 Price = p.Price
             }).ToList()
@@ -252,15 +249,15 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
     {
         // Arrange
         var orderId = Guid.NewGuid();
-        var orderDto = new OrderDTO();
+        var orderRequest = new OrderRequest();
         var order = new Order { Id = orderId };
         var userEmail = "test@email";
 
-        _mapperMock.Map<Order>(orderDto).Returns(order);
+        _mapperMock.Map<Order>(orderRequest).Returns(order);
         _orderServiceMock.UpdateOrderAsync(order, userEmail).Returns(true);
 
         // Act
-        var result = await controller.UpdateOrder(orderId, orderDto);
+        var result = await controller.UpdateOrder(orderId, orderRequest);
 
         // Assert
         Assert.IsType<NoContentResult>(result);

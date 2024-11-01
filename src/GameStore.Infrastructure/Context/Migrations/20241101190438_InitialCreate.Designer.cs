@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameStore.Infrastructure.Context.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241021193052_InitialCreate")]
+    [Migration("20241101190438_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -39,14 +39,8 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Height")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Length")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -60,50 +54,12 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Width")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .HasDatabaseName("IX_Boxes_Name");
 
                     b.ToTable("Boxes", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("f9205d04-b46b-4306-bbc1-8755e96c19d7"),
-                            CreatedAt = new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8763),
-                            CreatedByUser = "System",
-                            Height = 30,
-                            IsDeleted = false,
-                            Length = 80,
-                            Name = "Box 1",
-                            Width = 40
-                        },
-                        new
-                        {
-                            Id = new Guid("cfc68f93-e6b1-4176-b833-9e4ecd60dd27"),
-                            CreatedAt = new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8767),
-                            CreatedByUser = "System",
-                            Height = 80,
-                            IsDeleted = false,
-                            Length = 40,
-                            Name = "Box 2",
-                            Width = 50
-                        },
-                        new
-                        {
-                            Id = new Guid("44d69eb9-b591-4e37-8135-e0458522e2d5"),
-                            CreatedAt = new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8780),
-                            CreatedByUser = "System",
-                            Height = 50,
-                            IsDeleted = false,
-                            Length = 60,
-                            Name = "Box 3",
-                            Width = 80
-                        });
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Order", b =>
@@ -159,14 +115,8 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int>("Height")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Length")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -191,9 +141,6 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("double precision");
 
-                    b.Property<int>("Width")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -204,12 +151,71 @@ namespace GameStore.Infrastructure.Context.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
+            modelBuilder.Entity("GameStore.Domain.Models.Box", b =>
+                {
+                    b.OwnsOne("GameStore.Domain.Models.ValueObjects.Dimensions", "Dimensions", b1 =>
+                        {
+                            b1.Property<Guid>("BoxId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Height")
+                                .HasColumnType("integer")
+                                .HasColumnName("Height");
+
+                            b1.Property<int>("Length")
+                                .HasColumnType("integer")
+                                .HasColumnName("Length");
+
+                            b1.Property<int>("Width")
+                                .HasColumnType("integer")
+                                .HasColumnName("Width");
+
+                            b1.HasKey("BoxId");
+
+                            b1.ToTable("Boxes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BoxId");
+                        });
+
+                    b.Navigation("Dimensions")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GameStore.Domain.Models.Product", b =>
                 {
                     b.HasOne("GameStore.Domain.Models.Order", null)
                         .WithMany("Products")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.OwnsOne("GameStore.Domain.Models.ValueObjects.Dimensions", "Dimensions", b1 =>
+                        {
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Height")
+                                .HasColumnType("integer")
+                                .HasColumnName("Height");
+
+                            b1.Property<int>("Length")
+                                .HasColumnType("integer")
+                                .HasColumnName("Length");
+
+                            b1.Property<int>("Width")
+                                .HasColumnType("integer")
+                                .HasColumnName("Width");
+
+                            b1.HasKey("ProductId");
+
+                            b1.ToTable("Products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+                        });
+
+                    b.Navigation("Dimensions")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Order", b =>

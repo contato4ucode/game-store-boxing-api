@@ -44,13 +44,13 @@ public class BoxValidator : AbstractValidator<Box>
 
     public void ConfigureCommonRules()
     {
-        RuleFor(b => b.Height)
+        RuleFor(b => b.Dimensions.Height)
             .GreaterThan(0).WithMessage("Height must be greater than 0.");
 
-        RuleFor(b => b.Width)
+        RuleFor(b => b.Dimensions.Width)
             .GreaterThan(0).WithMessage("Width must be greater than 0.");
 
-        RuleFor(b => b.Length)
+        RuleFor(b => b.Dimensions.Length)
             .GreaterThan(0).WithMessage("Length must be greater than 0.");
     }
 

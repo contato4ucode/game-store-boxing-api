@@ -14,35 +14,25 @@ public class BoxMapping : EntityBaseMapping<Box>
                .IsRequired()
                .HasMaxLength(50);
 
-        builder.Property(b => b.Height).IsRequired();
-        builder.Property(b => b.Width).IsRequired();
-        builder.Property(b => b.Length).IsRequired();
+        builder.OwnsOne(b => b.Dimensions, dimensions =>
+        {
+            dimensions.Property(d => d.Height)
+                .IsRequired()
+                .HasColumnName("Height");
+
+            dimensions.Property(d => d.Width)
+                .IsRequired()
+                .HasColumnName("Width");
+
+            dimensions.Property(d => d.Length)
+                .IsRequired()
+                .HasColumnName("Length");
+        });
 
         builder.Ignore(b => b.Volume);
 
         builder.HasIndex(b => b.Name).HasDatabaseName("IX_Boxes_Name");
 
         builder.ToTable("Boxes");
-
-        builder.HasData(
-            new Box("Box 1", 30, 40, 80)
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
-                CreatedByUser = "System"
-            },
-            new Box("Box 2", 80, 50, 40)
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
-                CreatedByUser = "System"
-            },
-            new Box("Box 3", 50, 80, 60)
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
-                CreatedByUser = "System"
-            }
-        );
     }
 }

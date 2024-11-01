@@ -33,12 +33,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/auth/register",
+							"raw": "https://localhost:5001/api/v1/auth/register",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -74,12 +74,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/auth/login",
+							"raw": "https://localhost:5001/api/v1/auth/login",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -115,12 +115,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/auth/add-role",
+							"raw": "https://localhost:5001/api/v1/auth/add-role",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -156,12 +156,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/auth/assign-roles-claims",
+							"raw": "https://localhost:5001/api/v1/auth/assign-roles-claims",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -189,12 +189,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -202,7 +202,7 @@
 								"44d69eb9-b591-4e37-8135-e0458522e2d5"
 							]
 						},
-						"description": "### Retrieve Box Details\n\nThis endpoint makes an HTTP GET request to retrieve details of a specific box.\n\n#### Request\n\nThe request does not contain a request body. The endpoint URL is:\n\n```\nhttps://localhost:7224/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5\n\n ```\n\n#### Response\n\nThe response will include the details of the specified box."
+						"description": "### Retrieve Box Details\n\nThis endpoint makes an HTTP GET request to retrieve details of a specific box.\n\n#### Request\n\nThe request does not contain a request body. The endpoint URL is:\n\n```\nhttps://localhost:5001/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5\n\n ```\n\n#### Response\n\nThe response will include the details of the specified box."
 					},
 					"response": []
 				},
@@ -230,12 +230,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -258,12 +258,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/boxes/list",
+							"raw": "https://localhost:5001/api/v1/boxes/list",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -271,7 +271,7 @@
 								"list"
 							]
 						},
-						"description": "### Retrieve List of Boxes\n\nThis endpoint makes an HTTP GET request to retrieve a list of boxes.\n\n#### Request\n\n- Method: `GET`\n    \n- URL: `https://localhost:7224/api/v1/boxes/list`\n    \n\n#### Response\n\nThe response will be a JSON object with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"boxList\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"boxId\": {\n            \"type\": \"string\"\n          },\n          \"boxName\": {\n            \"type\": \"string\"\n          },\n          \"boxType\": {\n            \"type\": \"string\"\n          },\n          \"location\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\"boxId\", \"boxName\", \"boxType\", \"location\"]\n      }\n    }\n  }\n}\n\n ```\n\nThis endpoint makes a GET request to retrieve a list of boxes.\n\n#### Request\n\n- Method: `GET`\n    \n- URL: `https://localhost:7224/api/v1/boxes/list`\n    \n- Headers:\n    \n    - `accept: \\\\*/\\\\*`\n        \n\n#### Response\n\nThe response of this request can be documented as a JSON schema."
+						"description": "### Retrieve List of Boxes\n\nThis endpoint makes an HTTP GET request to retrieve a list of boxes.\n\n#### Request\n\n- Method: `GET`\n    \n- URL: `https://localhost:5001/api/v1/boxes/list`\n    \n\n#### Response\n\nThe response will be a JSON object with the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"boxList\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"boxId\": {\n            \"type\": \"string\"\n          },\n          \"boxName\": {\n            \"type\": \"string\"\n          },\n          \"boxType\": {\n            \"type\": \"string\"\n          },\n          \"location\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\"boxId\", \"boxName\", \"boxType\", \"location\"]\n      }\n    }\n  }\n}\n\n ```\n\nThis endpoint makes a GET request to retrieve a list of boxes.\n\n#### Request\n\n- Method: `GET`\n    \n- URL: `https://localhost:7224/api/v1/boxes/list`\n    \n- Headers:\n    \n    - `accept: \\\\\\*/\\\\\\*`\n        \n\n#### Response\n\nThe response of this request can be documented as a JSON schema."
 					},
 					"response": []
 				},
@@ -299,12 +299,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/boxes",
+							"raw": "https://localhost:5001/api/v1/boxes",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -326,12 +326,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -339,7 +339,7 @@
 								"44d69eb9-b591-4e37-8135-e0458522e2d5"
 							]
 						},
-						"description": "### Update Box Details\n\nThis endpoint is used to update the details of a specific box.\n\n#### Request\n\n- Method: `PATCH`\n    \n- URL: `https://localhost:7224/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request can be represented as a JSON schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
+						"description": "### Update Box Details\n\nThis endpoint is used to update the details of a specific box.\n\n#### Request\n\n- Method: `PATCH`\n    \n- URL: `https://localhost:5001/api/v1/boxes/44d69eb9-b591-4e37-8135-e0458522e2d5`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request can be represented as a JSON schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
 					},
 					"response": []
 				}
@@ -359,12 +359,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -372,7 +372,7 @@
 								"44d69eb9-b591-4e37-8135-e0458522e2d5"
 							]
 						},
-						"description": "### Retrieve Order Details\n\nThis endpoint retrieves the details of a specific order.\n\n#### Request\n\n- Method: GET\n    \n- URL: `https://localhost:7224/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request can be documented as a JSON schema. However, since the response data is masked, the JSON schema cannot be generated accurately without the actual response data."
+						"description": "### Retrieve Order Details\n\nThis endpoint retrieves the details of a specific order.\n\n#### Request\n\n- Method: GET\n    \n- URL: `https://localhost:5001/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request can be documented as a JSON schema. However, since the response data is masked, the JSON schema cannot be generated accurately without the actual response data."
 					},
 					"response": []
 				},
@@ -392,7 +392,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n  \"customerId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n  \"orderDate\": \"2024-10-22T01:24:58.966Z\",\r\n  \"totalPrice\": 0,\r\n  \"products\": [\r\n    {\r\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n      \"name\": \"string\",\r\n      \"description\": \"string\",\r\n      \"height\": 0,\r\n      \"width\": 0,\r\n      \"length\": 0,\r\n      \"weight\": 0,\r\n      \"price\": 0\r\n    }\r\n  ]\r\n}",
+							"raw": "{\r\n  \"customerId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n  \"productIds\": [\r\n    \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\r\n  ],\r\n  \"orderDate\": \"2024-11-01T19:41:56.298Z\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -400,20 +400,20 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/orders/3fa85f64-5717-4562-b3fc-2c963f66afa6",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
 								"orders",
-								"44d69eb9-b591-4e37-8135-e0458522e2d5"
+								"3fa85f64-5717-4562-b3fc-2c963f66afa6"
 							]
 						},
-						"description": "### Update Order Details\n\nThis endpoint allows updating the details of a specific order.\n\n#### Request Body\n\n- `id` (string): The unique identifier for the order.\n    \n- `customerId` (string): The unique identifier for the customer associated with the order.\n    \n- `orderDate` (string): The date and time of the order in ISO 8601 format.\n    \n- `totalPrice` (number): The total price of the order.\n    \n- `products` (array): An array of products included in the order, each containing the following fields:\n    \n    - `id` (string): The unique identifier for the product.\n        \n    - `name` (string): The name of the product.\n        \n    - `description` (string): The description of the product.\n        \n    - `height` (number): The height of the product.\n        \n    - `width` (number): The width of the product.\n        \n    - `length` (number): The length of the product.\n        \n    - `weight` (number): The weight of the product.\n        \n    - `price` (number): The price of the product.\n        \n\n#### Response Body\n\nThe response will contain the updated details of the order."
+						"description": "### Update Order Details\n\nThis endpoint is used to update the details of a specific order.\n\n#### Request Body\n\n- `customerId` (string): The ID of the customer placing the order.\n    \n- `productIds` (array of strings): An array of product IDs included in the order.\n    \n- `orderDate` (string): The date and time of the order in ISO 8601 format.\n    \n\n#### Response\n\nThe response will contain the updated details of the order.\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customerId\": {\n      \"type\": \"string\"\n    },\n    \"productIds\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"orderDate\": {\n      \"type\": \"string\",\n      \"format\": \"date-time\"\n    }\n  }\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -428,12 +428,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/orders/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -456,12 +456,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/orders/list",
+							"raw": "https://localhost:5001/api/v1/orders/list",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -469,7 +469,7 @@
 								"list"
 							]
 						},
-						"description": "### Retrieve Orders List\n\nThis endpoint is used to retrieve a list of orders.\n\n#### Request\n\n- Method: GET\n    \n- URL: `https://localhost:7224/api/v1/orders/list`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request is a JSON object representing the list of orders. Below is the JSON schema for the response:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"orders\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"order_id\": {\n            \"type\": \"string\"\n          },\n          \"customer_name\": {\n            \"type\": \"string\"\n          },\n          \"total_amount\": {\n            \"type\": \"number\"\n          },\n          \"order_date\": {\n            \"type\": \"string\",\n            \"format\": \"date-time\"\n          }\n        },\n        \"required\": [\"order_id\", \"customer_name\", \"total_amount\", \"order_date\"]\n      }\n    }\n  },\n  \"required\": [\"orders\"]\n}\n\n ```"
+						"description": "### Retrieve Orders List\n\nThis endpoint is used to retrieve a list of orders.\n\n#### Request\n\n- Method: GET\n    \n- URL: `https://localhost:5001/api/v1/orders/list`\n    \n- Headers:\n    \n    - accept: _/_\n        \n\n#### Response\n\nThe response for this request is a JSON object representing the list of orders. Below is the JSON schema for the response:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"orders\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"order_id\": {\n            \"type\": \"string\"\n          },\n          \"customer_name\": {\n            \"type\": \"string\"\n          },\n          \"total_amount\": {\n            \"type\": \"number\"\n          },\n          \"order_date\": {\n            \"type\": \"string\",\n            \"format\": \"date-time\"\n          }\n        },\n        \"required\": [\"order_id\", \"customer_name\", \"total_amount\", \"order_date\"]\n      }\n    }\n  },\n  \"required\": [\"orders\"]\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -497,12 +497,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/orders",
+							"raw": "https://localhost:5001/api/v1/orders",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -510,6 +510,47 @@
 							]
 						},
 						"description": "### Create a New Order\n\nThis endpoint is used to create a new order.\n\n#### Request Body\n\n- `customerId` (string): The ID of the customer placing the order.\n    \n- `productIds` (array of strings): An array containing the IDs of the products being ordered.\n    \n\nExample:\n\n``` json\n{\n  \"customerId\": \"3fa85f64-5717-4562-b3fc-2c963f ...\",\n  \"productIds\": [\n    \"3fa85f64-5717-4562-b3fc-2c963f ...\"\n  ]\n}\n\n ```\n\n#### Response\n\nThe response will contain the details of the newly created order."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Orders Bulk",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"customerId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\r\n    \"productIds\": [\r\n      \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\r\n    ],\r\n    \"orderDate\": \"2024-11-01T19:22:24.777Z\"\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:5001/api/v1/orders/bulk",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"orders",
+								"bulk"
+							]
+						},
+						"description": "### POST /api/v1/orders/bulk\n\nThis endpoint is used to create multiple orders in bulk.\n\n#### Request Body\n\n- The request body should be in JSON format.\n    \n- It should contain an array of objects, where each object represents an order with the following properties:\n    \n    - `customerId` (string): The ID of the customer placing the order.\n        \n    - `productIds` (array of strings): An array of product IDs included in the order.\n        \n    - `orderDate` (string): The date and time of the order in ISO 8601 format.\n        \n\nExample:\n\n``` json\n[\n  {\n    \"customerId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n    \"productIds\": [\n      \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n    ],\n    \"orderDate\": \"2024-11-01T19:22:24.777Z\"\n  }\n]\n\n ```\n\n#### Response\n\nThe response of this request is a JSON object representing the result of the bulk order creation. You can document the response using a JSON schema.\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"success\": {\n      \"type\": \"boolean\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    },\n    \"data\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"orderId\": {\n            \"type\": \"string\"\n          },\n          \"customerId\": {\n            \"type\": \"string\"\n          },\n          \"productIds\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"string\"\n            }\n          },\n          \"orderDate\": {\n            \"type\": \"string\",\n            \"format\": \"date-time\"\n          }\n        }\n      }\n    }\n  }\n}\n\n ```"
 					},
 					"response": []
 				}
@@ -529,12 +570,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -542,7 +583,7 @@
 								"44d69eb9-b591-4e37-8135-e0458522e2d5"
 							]
 						},
-						"description": "### Retrieve Product Details\n\nThis API endpoint makes an HTTP GET request to retrieve the details of a specific product.\n\n#### Request\n\nThe request does not contain a request body. It includes the following parameters:\n\n- Path parameter:\n    \n    - `product_id` (string): The unique identifier of the product to be retrieved.\n        \n\nExample:\n\n``` plaintext\nGET https://localhost:7224/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5\n\n ```\n\n#### Response\n\nThe response will be in JSON format and will adhere to the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"product_id\": {\n      \"type\": \"string\"\n    },\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"description\": {\n      \"type\": \"string\"\n    },\n    \"price\": {\n      \"type\": \"number\"\n    },\n    \"category\": {\n      \"type\": \"string\"\n    },\n    \"in_stock\": {\n      \"type\": \"boolean\"\n    }\n  }\n}\n\n ```"
+						"description": "### Retrieve Product Details\n\nThis API endpoint makes an HTTP GET request to retrieve the details of a specific product.\n\n#### Request\n\nThe request does not contain a request body. It includes the following parameters:\n\n- Path parameter:\n    \n    - `product_id` (string): The unique identifier of the product to be retrieved.\n        \n\nExample:\n\n``` plaintext\nGET https://localhost:5001/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5\n\n ```\n\n#### Response\n\nThe response will be in JSON format and will adhere to the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"product_id\": {\n      \"type\": \"string\"\n    },\n    \"name\": {\n      \"type\": \"string\"\n    },\n    \"description\": {\n      \"type\": \"string\"\n    },\n    \"price\": {\n      \"type\": \"number\"\n    },\n    \"category\": {\n      \"type\": \"string\"\n    },\n    \"in_stock\": {\n      \"type\": \"boolean\"\n    }\n  }\n}\n\n ```"
 					},
 					"response": []
 				},
@@ -570,12 +611,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -598,12 +639,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -611,7 +652,7 @@
 								"44d69eb9-b591-4e37-8135-e0458522e2d5"
 							]
 						},
-						"description": "This API endpoint sends an HTTP PATCH request to update the product with the specified ID. The request URL is `https://localhost:7224/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5`. The request body should contain the updated product information. Upon successful update, the endpoint will return a response with the updated product details."
+						"description": "This API endpoint sends an HTTP PATCH request to update the product with the specified ID. The request URL is `https://localhost:5001/api/v1/products/44d69eb9-b591-4e37-8135-e0458522e2d5`. The request body should contain the updated product information. Upon successful update, the endpoint will return a response with the updated product details."
 					},
 					"response": []
 				},
@@ -626,12 +667,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/products/list",
+							"raw": "https://localhost:5001/api/v1/products/list",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -639,7 +680,7 @@
 								"list"
 							]
 						},
-						"description": "### Retrieve Products List\n\nThis endpoint retrieves a list of products.\n\n#### HTTP Request\n\n``` http\nGET https://localhost:7224/api/v1/products/list\n\n ```\n\n#### Response\n\nThe response of this request is a JSON schema representing the structure of the products list.\n\nThis endpoint makes an HTTP GET request to retrieve a list of products.\n\n#### Request Body\n\nThis request does not require a request body.\n\n#### Response Body\n\nThe response will contain a list of products."
+						"description": "### Retrieve Products List\n\nThis endpoint retrieves a list of products.\n\n#### HTTP Request\n\n``` http\nGET https://localhost:5001/api/v1/products/list\n\n ```\n\n#### Response\n\nThe response of this request is a JSON schema representing the structure of the products list.\n\nThis endpoint makes an HTTP GET request to retrieve a list of products.\n\n#### Request Body\n\nThis request does not require a request body.\n\n#### Response Body\n\nThe response will contain a list of products."
 					},
 					"response": []
 				},
@@ -667,12 +708,12 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:7224/api/v1/products",
+							"raw": "https://localhost:5001/api/v1/products",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -699,12 +740,12 @@
 							}
 						],
 						"url": {
-							"raw": "https://localhost:7224/api/v1/packing/process-order/44d69eb9-b591-4e37-8135-e0458522e2d5",
+							"raw": "https://localhost:5001/api/v1/packing/process-order/44d69eb9-b591-4e37-8135-e0458522e2d5",
 							"protocol": "https",
 							"host": [
 								"localhost"
 							],
-							"port": "7224",
+							"port": "5001",
 							"path": [
 								"api",
 								"v1",

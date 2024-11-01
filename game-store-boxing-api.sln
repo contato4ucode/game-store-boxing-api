@@ -68,6 +68,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{81C5C088-B508-4463-BED6-8928F08A0344}"
 	ProjectSection(SolutionItems) = preProject
 		entrada.json = entrada.json
+		GameStore.postman_collection.json = GameStore.postman_collection.json
 		saida.json = saida.json
 	EndProjectSection
 EndProject

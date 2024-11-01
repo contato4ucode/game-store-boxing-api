@@ -1,4 +1,5 @@
 ﻿using GameStore.Domain.Interfaces;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace GameStore.Identity.Extensions;

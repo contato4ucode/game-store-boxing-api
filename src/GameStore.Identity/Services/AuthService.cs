@@ -4,6 +4,7 @@ using GameStore.Identity.Interfaces;
 using GameStore.Identity.ViewModels;
 using GameStore.SharedServices.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

@@ -8,7 +8,7 @@ public class OrderRequest
     public Guid CustomerId { get; set; }
 
     [Required]
-    public List<Guid> ProductIds { get; set; } = new();
+    public List<Guid> ProductIds { get; set; } = [];
 
     public DateTime? OrderDate { get; set; }
 }

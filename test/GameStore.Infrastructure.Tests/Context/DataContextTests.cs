@@ -51,7 +51,7 @@ public class DataContextTests
         // Assert
         Assert.NotNull(savedProduct);
         Assert.Equal("Test Product", savedProduct.Name);
-        Assert.Equal(10, savedProduct.Height);
+        Assert.Equal(10, savedProduct.Dimensions.Height);
         Assert.Equal(99.99m, savedProduct.Price);
         Assert.Equal("TestUser", savedProduct.CreatedByUser);
     }
@@ -95,7 +95,7 @@ public class DataContextTests
         // Assert
         Assert.NotNull(savedBox);
         Assert.Equal("Test Box", savedBox.Name);
-        Assert.Equal(50, savedBox.Height);
+        Assert.Equal(50, savedBox.Dimensions.Height);
         Assert.Equal("TestUser", savedBox.CreatedByUser);
     }
 }

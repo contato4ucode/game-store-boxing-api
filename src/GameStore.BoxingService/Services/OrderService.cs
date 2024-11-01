@@ -1,4 +1,5 @@
-﻿using GameStore.Domain.Interfaces.Notifications;
+﻿using GameStore.Domain.DTOs;
+using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
@@ -81,6 +82,38 @@ public class OrderService : BaseService, IOrderService
             await _unitOfWork.RollbackTransactionAsync();
             HandleException(ex);
             return null;
+        }
+    }
+
+    public async Task<IEnumerable<Order>> CreateOrdersBulkAsync(List<OrderDTO> orderDtos, string userEmail)
+    {
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            var orders = new List<Order>();
+
+            foreach (var orderDto in orderDtos)
+            {
+                var products = await LoadProductsByIdsAsync(orderDto.Products.Select(p => p.Id).ToList());
+
+                var order = new Order(orderDto.CustomerId, orderDto.OrderDate, products);
+                order.CreatedByUser = userEmail;
+
+                orders.Add(order);
+            }
+
+            await _unitOfWork.Orders.AddRange(orders);
+            await _unitOfWork.SaveAsync();
+            await _unitOfWork.CommitTransactionAsync();
+
+            return orders;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            HandleException(ex);
+            return Enumerable.Empty<Order>();
         }
     }
 

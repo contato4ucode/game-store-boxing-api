@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Models;

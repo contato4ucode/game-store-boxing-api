@@ -1,4 +1,6 @@
 ﻿using GameStore.Messaging.Interfaces;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace GameStore.Messaging.Services;
 

@@ -1,6 +1,7 @@
 ﻿using GameStore.BoxingService.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 using NSubstitute;
 
 namespace GameStore.BoxingService.Tests.Services;
@@ -23,14 +24,14 @@ public class PackingServiceTests
         var orderId = Guid.NewGuid();
         var order = new Order(orderId, DateTime.UtcNow, new List<Product>
         {
-            new Product("P1", 10, 10, 10, 1, 10.0m),
-            new Product("P2", 5, 5, 5, 1, 5.0m)
+            new Product("P1", new Dimensions(10, 10, 10), 1, 10.0m),
+            new Product("P2", new Dimensions(5, 5, 5), 1, 5.0m)
         });
 
         var boxes = new List<Box>
         {
-            new Box("Box1", 20, 20, 20),
-            new Box("Box2", 15, 15, 15)
+            new Box("Box1", new Dimensions(20, 20, 20)),
+            new Box("Box2", new Dimensions(15, 15, 15))
         };
 
         _unitOfWork.Orders.GetById(orderId).Returns(order);
@@ -52,12 +53,12 @@ public class PackingServiceTests
         var orderId = Guid.NewGuid();
         var order = new Order(orderId, DateTime.UtcNow, new List<Product>
         {
-            new Product("P1", 50, 50, 50, 10, 100.0m)
+            new Product("P1", new Dimensions(50, 50, 50), 10, 100.0m)
         });
 
         var boxes = new List<Box>
         {
-            new Box("Box1", 20, 20, 20)
+            new Box("Box1", new Dimensions(20, 20, 20))
         };
 
         _unitOfWork.Orders.GetById(orderId).Returns(order);
@@ -93,13 +94,13 @@ public class PackingServiceTests
         var orderId = Guid.NewGuid();
         var order = new Order(orderId, DateTime.UtcNow, new List<Product>
         {
-            new Product("P1", 10, 10, 10, 1, 10.0m)
+            new Product("P1", new Dimensions(10, 10, 10), 1, 10.0m)
         });
 
         var boxes = new List<Box>
         {
-            new Box("Box1", 20, 20, 20),
-            new Box("Box2", 15, 15, 15)
+            new Box("Box1", new Dimensions(20, 20, 20)),
+            new Box("Box2", new Dimensions(15, 15, 15))
         };
 
         _unitOfWork.Orders.GetById(orderId).Returns(order);

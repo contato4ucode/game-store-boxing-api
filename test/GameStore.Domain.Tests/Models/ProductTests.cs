@@ -1,4 +1,5 @@
 ﻿using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 
 namespace GameStore.Domain.Tests.Models;
 
@@ -15,16 +16,17 @@ public class ProductTests
         var length = 30;
         var weight = 2.5;
         var price = 100.0m;
+        var dimensions = new Dimensions(height, width, length);
 
         // Act
-        var product = new Product(name, height, width, length, weight, price, description);
+        var product = new Product(name, dimensions, weight, price, description);
 
         // Assert
         Assert.Equal(name, product.Name);
         Assert.Equal(description, product.Description);
-        Assert.Equal(height, product.Height);
-        Assert.Equal(width, product.Width);
-        Assert.Equal(length, product.Length);
+        Assert.Equal(dimensions.Height, product.Dimensions.Height);
+        Assert.Equal(dimensions.Width, product.Dimensions.Width);
+        Assert.Equal(dimensions.Length, product.Dimensions.Length);
         Assert.Equal(weight, product.Weight);
         Assert.Equal(price, product.Price);
     }
@@ -39,16 +41,17 @@ public class ProductTests
         var length = 30;
         var weight = 2.5;
         var price = 100.0m;
+        var dimensions = new Dimensions(height, width, length);
 
         // Act
-        var product = new Product(name, height, width, length, weight, price);
+        var product = new Product(name, dimensions, weight, price);
 
         // Assert
         Assert.Equal(name, product.Name);
         Assert.Null(product.Description);
-        Assert.Equal(height, product.Height);
-        Assert.Equal(width, product.Width);
-        Assert.Equal(length, product.Length);
+        Assert.Equal(dimensions.Height, product.Dimensions.Height);
+        Assert.Equal(dimensions.Width, product.Dimensions.Width);
+        Assert.Equal(dimensions.Length, product.Dimensions.Length);
         Assert.Equal(weight, product.Weight);
         Assert.Equal(price, product.Price);
     }
@@ -57,7 +60,8 @@ public class ProductTests
     public void Volume_ShouldCalculateCorrectly()
     {
         // Arrange
-        var product = new Product("Test Product", 10, 5, 2, 1.0, 50.0m);
+        var dimensions = new Dimensions(10, 5, 2);
+        var product = new Product("Test Product", dimensions, 1.0, 50.0m);
 
         // Act
         var volume = product.Volume;
@@ -70,7 +74,8 @@ public class ProductTests
     public void ToString_ShouldReturnFormattedString()
     {
         // Arrange
-        var product = new Product("Test Product", 10, 5, 2, 1.0, 50.00m);
+        var dimensions = new Dimensions(10, 5, 2);
+        var product = new Product("Test Product", dimensions, 1.0, 50.00m);
 
         // Act
         var result = product.ToString();
@@ -103,7 +108,8 @@ public class ProductTests
     public void ToggleIsDeleted_ShouldToggleIsDeletedFlag()
     {
         // Arrange
-        var product = new Product("Test Product", 10, 5, 2, 1.0, 50.0m);
+        var dimensions = new Dimensions(10, 5, 2);
+        var product = new Product("Test Product", dimensions, 1.0, 50.0m);
 
         // Act
         product.ToggleIsDeleted();
@@ -122,7 +128,8 @@ public class ProductTests
     public void Update_ShouldSetUpdatedAtToCurrentTime()
     {
         // Arrange
-        var product = new Product("Test Product", 10, 5, 2, 1.0, 50.0m);
+        var dimensions = new Dimensions(10, 5, 2);
+        var product = new Product("Test Product", dimensions, 1.0, 50.0m);
         DateTime? previousUpdateTime = product.UpdatedAt;
 
         // Act

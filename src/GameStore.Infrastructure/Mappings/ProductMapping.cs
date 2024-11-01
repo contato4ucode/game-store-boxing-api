@@ -17,14 +17,20 @@ public class ProductMapping : EntityBaseMapping<Product>
         builder.Property(p => p.Description)
             .HasMaxLength(500);
 
-        builder.Property(p => p.Height)
-            .IsRequired();
+        builder.OwnsOne(p => p.Dimensions, dimensions =>
+        {
+            dimensions.Property(d => d.Height)
+                .IsRequired()
+                .HasColumnName("Height");
 
-        builder.Property(p => p.Width)
-            .IsRequired();
+            dimensions.Property(d => d.Width)
+                .IsRequired()
+                .HasColumnName("Width");
 
-        builder.Property(p => p.Length)
-            .IsRequired();
+            dimensions.Property(d => d.Length)
+                .IsRequired()
+                .HasColumnName("Length");
+        });
 
         builder.Property(p => p.Weight)
             .IsRequired()

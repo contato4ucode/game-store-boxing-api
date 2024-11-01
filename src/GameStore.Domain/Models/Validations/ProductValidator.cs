@@ -47,13 +47,13 @@ public class ProductValidator : AbstractValidator<Product>
             .MaximumLength(500).WithMessage("Product description cannot exceed 500 characters.")
             .When(p => p.Description != null);
 
-        RuleFor(p => p.Height)
+        RuleFor(p => p.Dimensions.Height)
             .GreaterThan(0).WithMessage("Height must be greater than 0.");
 
-        RuleFor(p => p.Width)
+        RuleFor(p => p.Dimensions.Width)
             .GreaterThan(0).WithMessage("Width must be greater than 0.");
 
-        RuleFor(p => p.Length)
+        RuleFor(p => p.Dimensions.Length)
             .GreaterThan(0).WithMessage("Length must be greater than 0.");
 
         RuleFor(p => p.Weight)

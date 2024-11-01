@@ -28,19 +28,4 @@ public class BoxMappingTests
         Assert.Equal("Boxes", entityType.GetTableName());
         Assert.NotNull(entityType.FindIndex(entityType.FindProperty("Name")));
     }
-
-    [Fact]
-    public async Task Box_Seed_Data_Should_Be_Added()
-    {
-        // Arrange
-        using var context = new DataContext(_options);
-
-        await context.Database.EnsureCreatedAsync();
-
-        // Act
-        var boxes = await context.Boxes.ToListAsync();
-
-        // Assert
-        Assert.Equal(3, boxes.Count);
-    }
 }

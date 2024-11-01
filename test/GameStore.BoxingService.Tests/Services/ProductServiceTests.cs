@@ -5,6 +5,7 @@ using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Models.ValueObjects;
 using NSubstitute;
 
 namespace GameStore.BoxingService.Tests.Services;
@@ -26,7 +27,7 @@ public class ProductServiceTests
     public async Task GetByIdAsync_Should_Return_Product_When_Found()
     {
         // Arrange
-        var product = new Product("Test Product", 10, 10, 10, 2.5, 100.0m);
+        var product = new Product("Test Product", new Dimensions(10, 10, 10), 2.5, 100.0m);
         _unitOfWork.Products.GetById(product.Id).Returns(product);
 
         // Act
@@ -57,8 +58,8 @@ public class ProductServiceTests
         // Arrange
         var products = new List<Product>
         {
-            new Product("Product 1", 10, 10, 10, 1.0, 50.0m),
-            new Product("Product 2", 20, 20, 20, 2.0, 100.0m)
+            new Product("Product 1", new Dimensions(10, 10, 10), 1.0, 50.0m),
+            new Product("Product 2", new Dimensions(20, 20, 20), 2.0, 100.0m)
         };
         _unitOfWork.Products.GetAll().Returns(products);
 
@@ -74,7 +75,7 @@ public class ProductServiceTests
     public async Task CreateProductAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var product = new Product("Valid Product", 10, 10, 10, 2.0, 100.0m);
+        var product = new Product("Valid Product", new Dimensions(10, 10, 10), 2.0, 100.0m);
         var userEmail = "test@email";
 
         var validator = new ProductValidator(_unitOfWork);
@@ -94,7 +95,7 @@ public class ProductServiceTests
     public async Task CreateProductAsync_Should_Return_False_When_Invalid()
     {
         // Arrange
-        var product = new Product("", 10, 10, 10, 2.0, 100.0m);
+        var product = new Product("", new Dimensions(10, 10, 10), 2.0, 100.0m);
         var userEmail = "test@email";
         var expectedErrorMessage = "Product name cannot be empty.";
 
@@ -125,7 +126,7 @@ public class ProductServiceTests
     public async Task UpdateProductAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var product = new Product("Updated Product", 10, 10, 10, 2.0, 100.0m);
+        var product = new Product("Updated Product", new Dimensions(10, 10, 10), 2.0, 100.0m);
         var userEmail = "test@email";
 
         _unitOfWork.Products.GetById(product.Id).Returns(product);
@@ -147,7 +148,7 @@ public class ProductServiceTests
     public async Task UpdateProductAsync_Should_Return_False_When_Invalid()
     {
         // Arrange
-        var product = new Product("Invalid Product", 10, 10, 10, 2.0, 0.0m);
+        var product = new Product("Invalid Product", new Dimensions(10, 10, 10), 2.0, 0.0m);
         var userEmail = "test@email";
         var expectedErrorMessage = "Price must be greater than 0.";
 
@@ -181,7 +182,7 @@ public class ProductServiceTests
     {
         // Arrange
         var productId = Guid.NewGuid();
-        var product = new Product("Product to Delete", 10, 10, 10, 1.0, 50.0m);
+        var product = new Product("Product to Delete", new Dimensions(10, 10, 10), 1.0, 50.0m);
         var userEmail = "test@email";
 
         _unitOfWork.Products.GetById(productId).Returns(product);

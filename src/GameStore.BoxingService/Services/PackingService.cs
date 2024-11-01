@@ -44,9 +44,9 @@ public class PackingService : IPackingService
         {
             var suitableBox = availableBoxes
                 .Where(b =>
-                    b.Height >= product.Height &&
-                    b.Width >= product.Width &&
-                    b.Length >= product.Length)
+                    b.Dimensions.Height >= product.Dimensions.Height &&
+                    b.Dimensions.Width >= product.Dimensions.Width &&
+                    b.Dimensions.Length >= product.Dimensions.Length)
                 .OrderBy(b => b.Volume)
                 .FirstOrDefault();
 

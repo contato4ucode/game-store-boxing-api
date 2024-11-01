@@ -1,4 +1,5 @@
 ﻿using GameStore.Messaging.Interfaces;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;

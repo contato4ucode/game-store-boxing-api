@@ -85,6 +85,13 @@ public class ApiSettings
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+                context.Database.Migrate();
+                DataContextInitializer.Initialize(context);
+            }
         }
 
         app.UseSwaggerConfig(provider);

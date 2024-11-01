@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
-using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
 using GameStore.Domain.Common;
 using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces;
@@ -117,14 +117,42 @@ public class OrderController : MainController
         );
     }
 
-    [HttpPut("{id:guid}")]
-    [ClaimsAuthorize("Order", "Update")]
-    public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] OrderDTO orderDto)
+    [HttpPost("bulk")]
+    [ClaimsAuthorize("Order", "Add")]
+    public async Task<IActionResult> CreateOrdersBulk([FromBody] List<OrderRequest> requests)
     {
         return await HandleRequestAsync(
             async () =>
             {
-                var order = _mapper.Map<Order>(orderDto);
+                var orderDtos = requests.Select(request => new OrderDTO
+                {
+                    CustomerId = request.CustomerId,
+                    OrderDate = request.OrderDate ?? DateTime.UtcNow,
+                    Products = request.ProductIds.Select(id => new ProductDTO { Id = id }).ToList()
+                }).ToList();
+
+                var createdOrders = await _orderService.CreateOrdersBulkAsync(orderDtos, UserEmail);
+
+                if (createdOrders == null || !createdOrders.Any())
+                {
+                    return CustomResponse("Order creation failed", StatusCodes.Status400BadRequest);
+                }
+
+                var response = _mapper.Map<List<OrderResponse>>(createdOrders);
+                return CustomResponse(response, StatusCodes.Status201Created);
+            },
+            ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
+        );
+    }
+
+    [HttpPut("{id:guid}")]
+    [ClaimsAuthorize("Order", "Update")]
+    public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] OrderRequest request)
+    {
+        return await HandleRequestAsync(
+            async () =>
+            {
+                var order = _mapper.Map<Order>(request);
                 order.Id = id;
                 await _orderService.UpdateOrderAsync(order, UserEmail);
                 return CustomResponse(null, StatusCodes.Status204NoContent);

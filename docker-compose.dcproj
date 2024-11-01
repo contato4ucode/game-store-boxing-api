@@ -10,6 +10,11 @@
     <DockerServiceName>gamestore.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="entrada.json" />
+    <None Remove="GameStore.postman_collection.json" />
+    <None Remove="saida.json" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>

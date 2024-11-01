@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using FluentAssertions;
-using GameStore.API.Contracts.Reponses;
 using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
 using GameStore.API.Controllers.V1;
 using GameStore.Domain.Common;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -44,7 +45,7 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         // Arrange
         var productId = Guid.NewGuid();
         var product = new Product { Id = productId };
-        var productResponse = new ProductResponse { Id = productId };
+        var productResponse = new ProductResponse { Id = productId, Name = string.Empty };
         var cacheKey = $"Product:{productId}";
 
         _redisCacheServiceMock.GetCacheValueAsync<ProductResponse>(cacheKey).Returns((ProductResponse)null);
@@ -88,16 +89,14 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         // Arrange
         var products = new List<Product>
     {
-        new Product("Product 1", 10, 10, 10, 1.5, 100),
-        new Product("Product 2", 5, 5, 5, 0.5, 50)
+        new Product("Product 1", new Dimensions(10, 10, 10), 1.5, 100),
+        new Product("Product 2", new Dimensions(5, 5, 5), 0.5, 50)
     };
 
         var productResponses = products.Select(p => new ProductResponse
         {
             Name = p.Name,
-            Height = p.Height,
-            Width = p.Width,
-            Length = p.Length,
+            Dimensions = p.Dimensions,
             Weight = p.Weight,
             Price = p.Price
         }).ToList();
@@ -151,17 +150,16 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
     public async Task CreateProduct_ShouldReturn201_WhenProductIsCreated()
     {
         // Arrange
+        var dimensions = new Dimensions(10, 15, 20);
+
         var request = new ProductRequest
         {
             Name = "New Product",
-            Height = 10,
-            Width = 15,
-            Length = 20,
+            Dimensions = dimensions,
             Weight = 1.5,
             Price = 99.99M
         };
-        var product = new Product(request.Name, request.Height, request.Width,
-                                  request.Length, request.Weight, request.Price);
+        var product = new Product(request.Name, request.Dimensions, request.Weight, request.Price);
 
         _mapperMock.Map<Product>(request).Returns(product);
         _productServiceMock.CreateProductAsync(product, Arg.Any<string>()).Returns(true);

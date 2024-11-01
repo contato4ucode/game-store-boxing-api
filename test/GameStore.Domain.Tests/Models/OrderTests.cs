@@ -1,4 +1,5 @@
 ﻿using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 
 namespace GameStore.Domain.Tests.Models;
 
@@ -10,7 +11,8 @@ public class OrderTests
         // Arrange
         var customerId = Guid.NewGuid();
         var orderDate = DateTime.UtcNow;
-        var products = new List<Product> { new Product("Product 1", 10, 10, 10, 1.0, 50.0m) };
+        var dimensions = new Dimensions(10, 10, 10);
+        var products = new List<Product> { new Product("Product 1", dimensions, 1.0, 50.0m) };
 
         // Act
         var order = new Order(customerId, orderDate, products);
@@ -49,10 +51,12 @@ public class OrderTests
     public void TotalPrice_ShouldReturnCorrectSumOfProductPrices()
     {
         // Arrange
+        var dimensions1 = new Dimensions(10, 10, 10);
+        var dimensions2 = new Dimensions(5, 5, 5);
         var products = new List<Product>
         {
-            new Product("Product 1", 10, 10, 10, 1.0, 50.0m),
-            new Product("Product 2", 5, 5, 5, 0.5, 25.0m)
+            new Product("Product 1", dimensions1, 1.0, 50.0m),
+            new Product("Product 2", dimensions2, 0.5, 25.0m)
         };
         var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products);
 
@@ -99,7 +103,8 @@ public class OrderTests
     public void ToggleIsDeleted_ShouldToggleIsDeletedFlag()
     {
         // Arrange
-        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product> { new Product("Product 1", 10, 10, 10, 1.0, 50.0m) });
+        var dimensions = new Dimensions(10, 10, 10);
+        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product> { new Product("Product 1", dimensions, 1.0, 50.0m) });
 
         // Act
         order.ToggleIsDeleted();
@@ -118,7 +123,8 @@ public class OrderTests
     public void Update_ShouldSetUpdatedAtToCurrentTime()
     {
         // Arrange
-        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product> { new Product("Product 1", 10, 10, 10, 1.0, 50.0m) });
+        var dimensions = new Dimensions(10, 10, 10);
+        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, new List<Product> { new Product("Product 1", dimensions, 1.0, 50.0m) });
         DateTime? previousUpdateTime = order.UpdatedAt;
 
         // Act

@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace GameStore.Infrastructure.Context.Migrations
 {
     /// <inheritdoc />
@@ -79,16 +77,6 @@ namespace GameStore.Infrastructure.Context.Migrations
                         principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Boxes",
-                columns: new[] { "Id", "CreatedAt", "CreatedByUser", "Height", "IsDeleted", "Length", "Name", "UpdatedAt", "UpdatedByUser", "Width" },
-                values: new object[,]
-                {
-                    { new Guid("44d69eb9-b591-4e37-8135-e0458522e2d5"), new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8780), "System", 50, false, 60, "Box 3", null, null, 80 },
-                    { new Guid("cfc68f93-e6b1-4176-b833-9e4ecd60dd27"), new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8767), "System", 80, false, 40, "Box 2", null, null, 50 },
-                    { new Guid("f9205d04-b46b-4306-bbc1-8755e96c19d7"), new DateTime(2024, 10, 21, 19, 30, 52, 126, DateTimeKind.Utc).AddTicks(8763), "System", 30, false, 80, "Box 1", null, null, 40 }
                 });
 
             migrationBuilder.CreateIndex(

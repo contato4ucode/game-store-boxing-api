@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
-using GameStore.API.Contracts.Reponses;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using GameStore.API.Contracts.Requests;
 using GameStore.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
+using GameStore.API.Contracts.Responses;
 
 namespace GameStore.API.Controllers.V1;
 

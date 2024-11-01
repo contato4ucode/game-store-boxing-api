@@ -2,14 +2,14 @@
 
 public class OrderPackingRequestDTO
 {
-    public string OrderId { get; set; }
+    public string? OrderId { get; set; }
     public List<ProductRequestDTO> Products { get; set; } = new();
 }
 
 public class ProductRequestDTO
 {
-    public string ProductId { get; set; }
-    public DimensionsDTO Dimensions { get; set; }
+    public string? ProductId { get; set; }
+    public DimensionsDTO? Dimensions { get; set; }
 }
 
 public class DimensionsDTO

@@ -1,31 +1,24 @@
-﻿namespace GameStore.Domain.Models;
+﻿using GameStore.Domain.Models.ValueObjects;
+
+namespace GameStore.Domain.Models;
 
 public class Box : EntityBase
 {
-    public string Name { get; private set; }
-    public int Height { get; private set; }
-    public int Width { get; private set; }
-    public int Length { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public Dimensions Dimensions { get; private set; } = new Dimensions(0, 0, 0);
 
-    /// <summary>
-    /// Calcula o volume da caixa (altura x largura x comprimento).
-    /// </summary>
-    public int Volume => Height * Width * Length;
+    public int Volume => Dimensions.Volume;
 
-    public Box()
-    {
-    }
+    public Box() { }
 
-    public Box(string name, int height, int width, int length)
+    public Box(string name, Dimensions dimensions)
     {
         Name = name;
-        Height = height;
-        Width = width;
-        Length = length;
+        Dimensions = dimensions;
     }
 
     public override string ToString()
     {
-        return $"{Name} - {Height}x{Width}x{Length} cm";
+        return $"{Name} - {Dimensions}";
     }
 }

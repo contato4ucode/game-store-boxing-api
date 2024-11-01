@@ -5,6 +5,7 @@ using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.Validations;
+using GameStore.Domain.Models.ValueObjects;
 using NSubstitute;
 
 namespace GameStore.BoxingService.Tests.Services;
@@ -27,7 +28,7 @@ public class BoxServiceTests
     {
         // Arrange
         var boxId = Guid.NewGuid();
-        var box = new Box("Test Box", 50, 50, 50);
+        var box = new Box("Test Box", new Dimensions(50, 50, 50));
         _unitOfWork.Boxes.GetById(boxId).Returns(box);
 
         // Act
@@ -58,8 +59,8 @@ public class BoxServiceTests
         // Arrange
         var boxes = new List<Box>
         {
-            new Box("Box 1", 30, 40, 80),
-            new Box("Box 2", 80, 50, 40)
+            new Box("Box 1", new Dimensions(30, 40, 80)),
+            new Box("Box 2", new Dimensions(80, 50, 40))
         };
         _unitOfWork.Boxes.GetAll().Returns(boxes);
 
@@ -75,7 +76,7 @@ public class BoxServiceTests
     public async Task CreateBoxAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var box = new Box("Box 1", 30, 40, 80);
+        var box = new Box("Box 1", new Dimensions(30, 40, 80));
         var userEmail = "test@email";
         var validator = new BoxValidator(_unitOfWork);
         validator.ConfigureRulesForCreate();
@@ -98,7 +99,7 @@ public class BoxServiceTests
     public async Task CreateBoxAsync_Should_Return_False_When_Invalid()
     {
         // Arrange
-        var box = new Box("Invalid Box", -10, 40, 80);
+        var box = new Box("Invalid Box", new Dimensions(-10, 40, 80));
         var userEmail = "test@email";
         var expectedErrorMessage = "Height must be greater than 0.";
 
@@ -127,7 +128,7 @@ public class BoxServiceTests
     public async Task UpdateBoxAsync_Should_Return_True_When_Valid()
     {
         // Arrange
-        var box = new Box("Box 1", 30, 40, 80) { Id = Guid.NewGuid() };
+        var box = new Box("Box 1", new Dimensions(30, 40, 80)) { Id = Guid.NewGuid() };
         var userEmail = "test@email";
 
         _unitOfWork.Boxes.GetById(box.Id).Returns(box);
@@ -152,7 +153,7 @@ public class BoxServiceTests
     {
         // Arrange
         var boxId = Guid.NewGuid();
-        var box = new Box("Box 1", 30, 40, 80);
+        var box = new Box("Box 1", new Dimensions(30, 40, 80));
         var userEmail = "test@email";
 
         _unitOfWork.Boxes.GetById(boxId).Returns(box);
