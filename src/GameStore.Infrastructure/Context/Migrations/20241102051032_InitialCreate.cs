@@ -61,7 +61,6 @@ namespace GameStore.Infrastructure.Context.Migrations
                     Length = table.Column<int>(type: "integer", nullable: false),
                     Weight = table.Column<double>(type: "double precision", precision: 5, scale: 2, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedByUser = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -71,10 +70,28 @@ namespace GameStore.Infrastructure.Context.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderProducts",
+                columns: table => new
+                {
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductsId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderProducts", x => new { x.OrderId, x.ProductsId });
                     table.ForeignKey(
-                        name: "FK_Products_Orders_OrderId",
+                        name: "FK_OrderProducts_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderProducts_Products_ProductsId",
+                        column: x => x.ProductsId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -85,14 +102,14 @@ namespace GameStore.Infrastructure.Context.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderProducts_ProductsId",
+                table: "OrderProducts",
+                column: "ProductsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Products_Name",
                 table: "Products",
                 column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_OrderId",
-                table: "Products",
-                column: "OrderId");
         }
 
         /// <inheritdoc />
@@ -102,10 +119,13 @@ namespace GameStore.Infrastructure.Context.Migrations
                 name: "Boxes");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "OrderProducts");
 
             migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "Products");
         }
     }
 }

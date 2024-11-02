@@ -757,6 +757,51 @@
 						"description": "### HTTP POST /api/v1/packing/process-order/{order_id}\n\nThis endpoint is used to process an order with the specified order ID.\n\n#### Request Body\n\nThe request body should contain the details of the order to be processed. The structure of the request body is as follows:\n\n- `order_details`: (text) The details of the order to be processed.\n    \n\n#### Response\n\nUpon successful processing of the order, the response will contain the details of the processed order along with a success message. The structure of the response body is as follows:\n\n- `order_id`: The ID of the processed order.\n    \n- `processed_items`: The items that have been processed.\n    \n- `message`: A success message indicating the successful processing of the order.\n    \n\nExample Request Body:\n\n``` json\n{\n  \"order_details\": \"Sample order details\"\n}\n\n ```\n\nExample Response:\n\n``` json\n{\n  \"order_id\": \"44d69eb9-b591-4e37-8135-e0458522e2d5\",\n  \"processed_items\": [\"item1\", \"item2\"],\n  \"message\": \"Order processed successfully\"\n}\n\n ```"
 					},
 					"response": []
+				},
+				{
+					"name": "Process Orders Bulk",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJCb3giOlsiR2V0IiwiQWRkIiwiVXBkYXRlIiwiRGVsZXRlIl0sIk9yZGVyIjpbIkdldCIsIkFkZCIsIlVwZGF0ZSIsIkRlbGV0ZSJdLCJQcm9kdWN0IjpbIkdldCIsIkFkZCIsIlVwZGF0ZSIsIkRlbGV0ZSJdLCJzdWIiOiIyZDcxYzM2MS03MTM4LTQxN2UtYmUyMC1lYjY2NTE1NjhjZGEiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiMjZkODg0ODMtMGI1Ny00MjM3LWIzZWUtYjJkMmIzYThjZjNmIiwibmJmIjoxNzMwNTI2MTExLCJpYXQiOjE3MzA1MjYxMTEsInJvbGUiOiJBZG1pbiIsImV4cCI6MTczMDUzMzMxMSwiaXNzIjoiR2FtZVN0b3JlIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo3MDY5In0.wESoqwQKS81Y_RsKe6OyWb8lbnsGfoGA1LeI7qY-OFo"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  \"d4e0a329-35cd-466c-88c5-6871b8c91083\",\r\n  \"dc2692d8-6347-43e3-bb72-269b815cd2af\",\r\n  \"978e600f-9b93-4205-8697-ce270ee8748a\",\r\n  \"0ff9bbf6-2133-4aee-a61d-efeeae5ae840\",\r\n  \"0b94d8ff-9720-4458-a6e6-556336dfaf95\",\r\n  \"44f7f41e-776a-4b6d-88dc-7f7d9ac291d3\",\r\n  \"3bc076e7-1321-4fbd-a899-a4ab922b1978\",\r\n  \"621d8be7-4bf0-486b-b4b3-a6ea51a7bb7e\",\r\n  \"4d5b4f78-3b13-4983-b45d-246dd1dc8b23\",\r\n  \"28999371-b274-40d0-a66b-338a4a041f39\"\r\n]\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:5001/api/v1/packing/process-orders",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"packing",
+								"process-orders"
+							]
+						},
+						"description": "### Process Orders\n\nThis endpoint is used to process orders.\n\n#### Request Body\n\n- Type: Raw\n    \n- \\[\"d4e0a329-35cd-466c-88c5-6871b8c91083\", \"dc2692d8-6347-43e3-bb72-269b815cd2af\", \"978e600f-9b93-4205-8697-ce270ee8748a\", \"0ff9bbf6-2133-4aee-a61d-efeeae5ae840\", \"0b94d8ff-9720-4458-a6e6-556336dfaf95\", \"44f7f41e-776a-4b6d-88dc-7f7d9ac291d3\", \"3bc076e7-1321-4fbd-a899-a4ab922b1978\", \"621d8be7-4bf0-486b-b4b3-a6ea51a7bb7e\", \"4d5b4f78-3b13-4983-b45d-246dd1dc8b23\", \"28999371-b274-40d0-a66b-338a4a041f39\"\\]\n    \n\n#### Response\n\nThe response for this request is a JSON schema. The specific structure of the response will depend on the implementation and the data available at the time of the request."
+					},
+					"response": []
 				}
 			]
 		}

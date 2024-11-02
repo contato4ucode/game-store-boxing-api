@@ -10,6 +10,7 @@ using GameStore.API.Contracts.Requests;
 using Microsoft.AspNetCore.Authorization;
 using GameStore.Domain.Common;
 using GameStore.API.Contracts.Responses;
+using GameStore.Domain.DTOs;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -38,7 +39,7 @@ public class ProductController : MainController
     public async Task<IActionResult> GetProductById(Guid id)
     {
         var cacheKey = $"Product:{id}";
-        var cachedProduct = await _redisCacheService.GetCacheValueAsync<ProductResponse>(cacheKey);
+        var cachedProduct = await _redisCacheService.GetCacheValueAsync<ProductDTO>(cacheKey);
         if (cachedProduct != null)
         {
             return CustomResponse(cachedProduct);
@@ -52,7 +53,7 @@ public class ProductController : MainController
                 {
                     return CustomResponse("Product not found", StatusCodes.Status404NotFound);
                 }
-                var productResponse = _mapper.Map<ProductResponse>(product);
+                var productResponse = _mapper.Map<ProductDTO>(product);
                 await _redisCacheService.SetCacheValueAsync(cacheKey, productResponse);
                 return CustomResponse(productResponse);
             },
@@ -69,16 +70,16 @@ public class ProductController : MainController
             {
                 string cacheKey = $"ProductList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
 
-                var cachedProducts = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey);
+                var cachedProducts = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<ProductDTO>>(cacheKey);
                 if (cachedProducts != null)
                 {
                     return CustomResponse(cachedProducts);
                 }
 
                 var products = await _productService.GetAllAsync();
-                var productResponses = _mapper.Map<IEnumerable<ProductResponse>>(products);
+                var productResponses = _mapper.Map<IEnumerable<ProductDTO>>(products);
 
-                var paginatedResponse = new PaginatedResponse<ProductResponse>(
+                var paginatedResponse = new PaginatedResponse<ProductDTO>(
                     productResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
                     productResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
                 );

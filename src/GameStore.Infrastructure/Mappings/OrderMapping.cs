@@ -19,8 +19,8 @@ public class OrderMapping : EntityBaseMapping<Order>
         builder.Ignore(o => o.TotalPrice);
 
         builder.HasMany(o => o.Products)
-               .WithOne()
-               .OnDelete(DeleteBehavior.Cascade);
+               .WithMany()
+               .UsingEntity(j => j.ToTable("OrderProducts"));
 
         builder.ToTable("Orders");
     }

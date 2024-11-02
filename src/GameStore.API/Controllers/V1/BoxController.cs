@@ -11,6 +11,7 @@ using GameStore.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using GameStore.API.Contracts.Responses;
 using Azure;
+using GameStore.Domain.DTOs;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -39,7 +40,7 @@ public class BoxController : MainController
     public async Task<IActionResult> GetBoxById(Guid id)
     {
         var cacheKey = $"Box:{id}";
-        var cachedBox = await _redisCacheService.GetCacheValueAsync<BoxResponse>(cacheKey);
+        var cachedBox = await _redisCacheService.GetCacheValueAsync<BoxDTO>(cacheKey);
         if (cachedBox != null)
         {
             return CustomResponse(cachedBox);
@@ -53,7 +54,7 @@ public class BoxController : MainController
                 {
                     return CustomResponse("Box not found", StatusCodes.Status404NotFound);
                 }
-                var boxResponse = _mapper.Map<BoxResponse>(box);
+                var boxResponse = _mapper.Map<BoxDTO>(box);
                 await _redisCacheService.SetCacheValueAsync(cacheKey, boxResponse);
                 return CustomResponse(boxResponse);
             },
@@ -70,16 +71,16 @@ public class BoxController : MainController
             {
                 string cacheKey = $"BoxList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
 
-                var cachedBoxes = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey);
+                var cachedBoxes = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<BoxDTO>>(cacheKey);
                 if (cachedBoxes != null)
                 {
                     return CustomResponse(cachedBoxes);
                 }
 
                 var boxes = await _boxService.GetAllAsync();
-                var boxResponses = _mapper.Map<IEnumerable<BoxResponse>>(boxes);
+                var boxResponses = _mapper.Map<IEnumerable<BoxDTO>>(boxes);
 
-                var paginatedResponse = new PaginatedResponse<BoxResponse>(
+                var paginatedResponse = new PaginatedResponse<BoxDTO>(
                     boxResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
                     boxResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
                 );

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameStore.Infrastructure.Context.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241101190438_InitialCreate")]
+    [Migration("20241102051032_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -123,9 +123,6 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uuid");
-
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
@@ -146,9 +143,22 @@ namespace GameStore.Infrastructure.Context.Migrations
                     b.HasIndex("Name")
                         .HasDatabaseName("IX_Products_Name");
 
-                    b.HasIndex("OrderId");
-
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("OrderProduct", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("OrderId", "ProductsId");
+
+                    b.HasIndex("ProductsId");
+
+                    b.ToTable("OrderProducts", (string)null);
                 });
 
             modelBuilder.Entity("GameStore.Domain.Models.Box", b =>
@@ -184,11 +194,6 @@ namespace GameStore.Infrastructure.Context.Migrations
 
             modelBuilder.Entity("GameStore.Domain.Models.Product", b =>
                 {
-                    b.HasOne("GameStore.Domain.Models.Order", null)
-                        .WithMany("Products")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.OwnsOne("GameStore.Domain.Models.ValueObjects.Dimensions", "Dimensions", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
@@ -218,9 +223,19 @@ namespace GameStore.Infrastructure.Context.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GameStore.Domain.Models.Order", b =>
+            modelBuilder.Entity("OrderProduct", b =>
                 {
-                    b.Navigation("Products");
+                    b.HasOne("GameStore.Domain.Models.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GameStore.Domain.Models.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

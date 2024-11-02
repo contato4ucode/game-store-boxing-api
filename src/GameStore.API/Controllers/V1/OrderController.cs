@@ -40,7 +40,7 @@ public class OrderController : MainController
     public async Task<IActionResult> GetOrderById(Guid id)
     {
         var cacheKey = $"Order:{id}";
-        var cachedOrder = await _redisCacheService.GetCacheValueAsync<OrderResponse>(cacheKey);
+        var cachedOrder = await _redisCacheService.GetCacheValueAsync<OrderDTO>(cacheKey);
         if (cachedOrder != null)
         {
             return CustomResponse(cachedOrder);
@@ -54,7 +54,7 @@ public class OrderController : MainController
                 {
                     return CustomResponse("Resource not found", StatusCodes.Status404NotFound);
                 }
-                var orderResponse = _mapper.Map<OrderResponse>(order);
+                var orderResponse = _mapper.Map<OrderDTO>(order);
                 await _redisCacheService.SetCacheValueAsync(cacheKey, orderResponse);
                 return CustomResponse(orderResponse);
             },
@@ -71,16 +71,16 @@ public class OrderController : MainController
             {
                 string cacheKey = $"OrderList:Page:{page ?? 1}:PageSize:{pageSize ?? 10}";
 
-                var cachedOrders = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<OrderResponse>>(cacheKey);
+                var cachedOrders = await _redisCacheService.GetCacheValueAsync<PaginatedResponse<OrderDTO>>(cacheKey);
                 if (cachedOrders != null)
                 {
                     return CustomResponse(cachedOrders);
                 }
 
                 var orders = await _orderService.GetAllOrdersAsync();
-                var orderResponses = _mapper.Map<IEnumerable<OrderResponse>>(orders);
+                var orderResponses = _mapper.Map<IEnumerable<OrderDTO>>(orders);
 
-                var paginatedResponse = new PaginatedResponse<OrderResponse>(
+                var paginatedResponse = new PaginatedResponse<OrderDTO>(
                     orderResponses.Skip((page.GetValueOrDefault(1) - 1) * pageSize.GetValueOrDefault(10)).Take(pageSize.GetValueOrDefault(10)).ToList(),
                     orderResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
                 );
