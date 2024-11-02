@@ -77,4 +77,39 @@ public class RedisCacheService : IRedisCacheService
             throw;
         }
     }
+
+    public async Task SetCacheValueWithPaginationAsync<T>(string key, T value, TimeSpan? expiration = null)
+    {
+        try
+        {
+            var jsonValue = JsonConvert.SerializeObject(value, _jsonSettings);
+            if (expiration.HasValue)
+            {
+                await _database.StringSetAsync(key, jsonValue, expiration);
+            }
+            else
+            {
+                await _database.StringSetAsync(key, jsonValue);
+            }
+
+            await _database.ListRightPushAsync("OrderCacheKeys", key);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao definir o valor do cache: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task InvalidatePagedCacheAsync()
+    {
+        var keys = await _database.ListRangeAsync("OrderCacheKeys");
+
+        foreach (var key in keys)
+        {
+            await _database.KeyDeleteAsync((RedisKey)key.ToString());
+        }
+
+        await _database.KeyDeleteAsync("OrderCacheKeys");
+    }
 }

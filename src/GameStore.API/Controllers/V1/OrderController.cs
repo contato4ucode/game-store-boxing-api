@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
+using Azure;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Contracts.Responses;
 using GameStore.Domain.Common;
@@ -84,7 +85,7 @@ public class OrderController : MainController
                     orderResponses.Count(), page.GetValueOrDefault(1), pageSize.GetValueOrDefault(10)
                 );
 
-                await _redisCacheService.SetCacheValueAsync(cacheKey, paginatedResponse);
+                await _redisCacheService.SetCacheValueWithPaginationAsync(cacheKey, paginatedResponse);
 
                 return CustomResponse(paginatedResponse);
             },
@@ -111,6 +112,10 @@ public class OrderController : MainController
                 }
 
                 var response = _mapper.Map<OrderResponse>(order);
+
+                await _redisCacheService.SetCacheValueAsync($"Order:{order.Id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(response, StatusCodes.Status201Created);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -139,6 +144,9 @@ public class OrderController : MainController
                 }
 
                 var response = _mapper.Map<List<OrderResponse>>(createdOrders);
+
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(response, StatusCodes.Status201Created);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -155,6 +163,12 @@ public class OrderController : MainController
                 var order = _mapper.Map<Order>(request);
                 order.Id = id;
                 await _orderService.UpdateOrderAsync(order, UserEmail);
+
+                var updatedOrder = await _orderService.GetOrderByIdAsync(id);
+                var response = _mapper.Map<OrderResponse>(updatedOrder);
+                await _redisCacheService.SetCacheValueAsync($"Order:{id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -169,6 +183,10 @@ public class OrderController : MainController
             async () =>
             {
                 await _orderService.SoftDeleteOrderAsync(id, UserEmail);
+
+                await _redisCacheService.RemoveCacheValueAsync($"Order:{id}");
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

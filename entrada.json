@@ -1,206 +1,81 @@
-{
-  "pedidos": [
-    {
-      "pedido_id": 1,
-      "produtos": [
-        {
-          "produto_id": "PS5",
-          "dimensoes": {
-            "altura": 40,
-            "largura": 10,
-            "comprimento": 25
-          }
-        },
-        {
-          "produto_id": "Volante",
-          "dimensoes": {
-            "altura": 40,
-            "largura": 30,
-            "comprimento": 30
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 2,
-      "produtos": [
-        {
-          "produto_id": "Joystick",
-          "dimensoes": {
-            "altura": 15,
-            "largura": 20,
-            "comprimento": 10
-          }
-        },
-        {
-          "produto_id": "Fifa 24",
-          "dimensoes": {
-            "altura": 10,
-            "largura": 30,
-            "comprimento": 10
-          }
-        },
-        {
-          "produto_id": "Call of Duty",
-          "dimensoes": {
-            "altura": 30,
-            "largura": 15,
-            "comprimento": 10
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 3,
-      "produtos": [
-        {
-          "produto_id": "Headset",
-          "dimensoes": {
-            "altura": 25,
-            "largura": 15,
-            "comprimento": 20
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 4,
-      "produtos": [
-        {
-          "produto_id": "Mouse Gamer",
-          "dimensoes": {
-            "altura": 5,
-            "largura": 8,
-            "comprimento": 12
-          }
-        },
-        {
-          "produto_id": "Teclado Mecânico",
-          "dimensoes": {
-            "altura": 4,
-            "largura": 45,
-            "comprimento": 15
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 5,
-      "produtos": [
-        {
-          "produto_id": "Cadeira Gamer",
-          "dimensoes": {
-            "altura": 120,
-            "largura": 60,
-            "comprimento": 70
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 6,
-      "produtos": [
-        {
-          "produto_id": "Webcam",
-          "dimensoes": {
-            "altura": 7,
-            "largura": 10,
-            "comprimento": 5
-          }
-        },
-        {
-          "produto_id": "Microfone",
-          "dimensoes": {
-            "altura": 25,
-            "largura": 10,
-            "comprimento": 10
-          }
-        },
-        {
-          "produto_id": "Monitor",
-          "dimensoes": {
-            "altura": 50,
-            "largura": 60,
-            "comprimento": 20
-          }
-        },
-        {
-          "produto_id": "Notebook",
-          "dimensoes": {
-            "altura": 2,
-            "largura": 35,
-            "comprimento": 25
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 7,
-      "produtos": [
-        {
-          "produto_id": "Jogo de Cabos",
-          "dimensoes": {
-            "altura": 5,
-            "largura": 15,
-            "comprimento": 10
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 8,
-      "produtos": [
-        {
-          "produto_id": "Controle Xbox",
-          "dimensoes": {
-            "altura": 10,
-            "largura": 15,
-            "comprimento": 10
-          }
-        },
-        {
-          "produto_id": "Carregador",
-          "dimensoes": {
-            "altura": 3,
-            "largura": 8,
-            "comprimento": 8
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 9,
-      "produtos": [
-        {
-          "produto_id": "Tablet",
-          "dimensoes": {
-            "altura": 1,
-            "largura": 25,
-            "comprimento": 17
-          }
-        }
-      ]
-    },
-    {
-      "pedido_id": 10,
-      "produtos": [
-        {
-          "produto_id": "HD Externo",
-          "dimensoes": {
-            "altura": 2,
-            "largura": 8,
-            "comprimento": 12
-          }
-        },
-        {
-          "produto_id": "Pendrive",
-          "dimensoes": {
-            "altura": 1,
-            "largura": 2,
-            "comprimento": 5
-          }
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "customerId": "e2312df2-8baf-4c69-a7b2-1a5aaf1c1034",
+    "productIds": [
+      "a5a5de6b-57e9-499d-ad9d-adee8542ad48",
+      "6b7124b5-a37d-42d8-8c53-b727d6a88011"
+    ],
+    "orderDate": "2024-11-01T10:00:00Z"
+  },
+  {
+    "customerId": "b313ad82-5c45-4c3b-a7f1-9ad5a5c6732e",
+    "productIds": [
+      "639a3ff7-c895-4ca8-8512-829386d6555d",
+      "001a03dc-3d69-452c-9b65-a7944fd7cbf5",
+      "2315e0c2-98e0-4d1d-9be7-9f2b4d7a03cf"
+    ],
+    "orderDate": "2024-11-01T11:00:00Z"
+  },
+  {
+    "customerId": "f9273ba5-09be-40cd-882a-5a6c89d7f8c7",
+    "productIds": [
+      "cc038205-8338-4f30-b08a-74e276087de7"
+    ],
+    "orderDate": "2024-11-01T12:00:00Z"
+  },
+  {
+    "customerId": "d12b89a1-4f5b-43a1-b3f5-cd8d57f913b7",
+    "productIds": [
+      "1b9af0e2-4908-46bd-8bd2-41dbdf5e17ef",
+      "dbdc0ba8-2a08-4621-9a00-2236a367b937"
+    ],
+    "orderDate": "2024-11-01T13:00:00Z"
+  },
+  {
+    "customerId": "fa8723cd-21d3-4f95-92c9-2f6ed6ef1276",
+    "productIds": [
+      "431f69e8-24a4-4d4a-b4d7-ec2938e7b345"
+    ],
+    "orderDate": "2024-11-01T14:00:00Z"
+  },
+  {
+    "customerId": "e716c5f4-3b4d-4b8e-b1f1-cba92c7d9f81",
+    "productIds": [
+      "70b769bd-ef1e-4bac-b695-f5671ef5192d",
+      "2b9f11b2-c0e3-44f1-9c53-12c444a31769",
+      "f6289bde-a8e6-4043-98b7-f4d5846de12c",
+      "6b29d537-f970-4f3c-8903-f02ff882a1cc"
+    ],
+    "orderDate": "2024-11-01T15:00:00Z"
+  },
+  {
+    "customerId": "3f45ad92-d8bc-4b1d-872d-70cbb4c6b09f",
+    "productIds": [
+      "a0bc1900-d06a-4b55-8995-d8131ea5d25b"
+    ],
+    "orderDate": "2024-11-01T16:00:00Z"
+  },
+  {
+    "customerId": "7d6a24e3-b945-47e8-8e7c-d4f9309f5b38",
+    "productIds": [
+      "0236953b-e575-4a91-8a8d-ab2b013251ef",
+      "d4e105a1-4f7f-41c9-a7bd-8746fd49be5c"
+    ],
+    "orderDate": "2024-11-01T17:00:00Z"
+  },
+  {
+    "customerId": "a6be4d3a-6d3a-47cb-981b-cb4c7e5c0f42",
+    "productIds": [
+      "360d1ff2-d5b2-491c-b8c1-fe14ce82f932"
+    ],
+    "orderDate": "2024-11-01T18:00:00Z"
+  },
+  {
+    "customerId": "8f0de5d1-4d6f-4a1c-b56f-8e9d5b7a21e8",
+    "productIds": [
+      "30be2bed-99a1-40bd-9ee6-1d6e875b8e97",
+      "70dd772e-0fd0-4a77-a897-ac86437ad919"
+    ],
+    "orderDate": "2024-11-01T19:00:00Z"
+  }
+]

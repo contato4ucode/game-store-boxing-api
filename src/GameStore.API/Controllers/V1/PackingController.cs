@@ -28,19 +28,42 @@ public class PackingController : MainController
             return CustomResponse(ModelState);
 
         return await HandleRequestAsync(
-        async () =>
-        {
-            var result = await _packingService.ProcessOrderAsync(orderId);
-            return CustomResponse(result);
-        },
-        ex =>
-        {
-            HandleException(ex);
-            return StatusCode(500, new Dictionary<string, object>
+            async () =>
             {
-            { "success", false },
-            { "errors", new List<string> { "An unexpected error occurred." } }
+                var result = await _packingService.ProcessOrderAsync(orderId);
+                return CustomResponse(result);
+            },
+            ex =>
+            {
+                HandleException(ex);
+                return StatusCode(500, new Dictionary<string, object>
+                {
+                    { "success", false },
+                    { "errors", new List<string> { "An unexpected error occurred." } }
+                });
             });
-        });
+    }
+
+    [HttpPost("process-orders")]
+    public async Task<IActionResult> ProcessOrders([FromBody] List<Guid> orderIds)
+    {
+        if (!ModelState.IsValid)
+            return CustomResponse(ModelState);
+
+        return await HandleRequestAsync(
+            async () =>
+            {
+                var result = await _packingService.ProcessOrdersAsync(orderIds);
+                return CustomResponse(new { pedidos = result });
+            },
+            ex =>
+            {
+                HandleException(ex);
+                return StatusCode(500, new Dictionary<string, object>
+                {
+                    { "success", false },
+                    { "errors", new List<string> { "An unexpected error occurred." } }
+                });
+            });
     }
 }

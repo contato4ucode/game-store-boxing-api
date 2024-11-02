@@ -105,6 +105,10 @@ public class ProductController : MainController
                     return CustomResponse("Failed to create product", StatusCodes.Status400BadRequest);
                 }
                 var response = _mapper.Map<ProductResponse>(product);
+
+                await _redisCacheService.SetCacheValueAsync($"Product:{product.Id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(response, StatusCodes.Status201Created);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -121,6 +125,12 @@ public class ProductController : MainController
                 var product = _mapper.Map<Product>(request);
                 product.Id = id;
                 await _productService.UpdateProductAsync(product, UserEmail);
+
+                var updatedProduct = _productService.GetByIdAsync(id);
+                var response = _mapper.Map<ProductResponse>(updatedProduct);
+                await _redisCacheService.SetCacheValueAsync($"Product:{id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -135,6 +145,10 @@ public class ProductController : MainController
             async () =>
             {
                 await _productService.SoftDeleteProductAsync(id, UserEmail);
+
+                await _redisCacheService.RemoveCacheValueAsync($"Product:{id}");
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

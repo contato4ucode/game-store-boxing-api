@@ -10,6 +10,7 @@ using GameStore.API.Contracts.Requests;
 using GameStore.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using GameStore.API.Contracts.Responses;
+using Azure;
 
 namespace GameStore.API.Controllers.V1;
 
@@ -108,6 +109,10 @@ public class BoxController : MainController
                     return CustomResponse("Failed to create box", StatusCodes.Status400BadRequest);
                 }
                 var response = _mapper.Map<BoxResponse>(box);
+
+                await _redisCacheService.SetCacheValueAsync($"Box:{box.Id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(response, StatusCodes.Status201Created);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -124,6 +129,12 @@ public class BoxController : MainController
                 var box = _mapper.Map<Box>(request);
                 box.Id = id;
                 await _boxService.CreateBoxAsync(box, UserEmail);
+
+                var updatedBox = await _boxService.GetByIdAsync(id);
+                var response = _mapper.Map<BoxResponse>(updatedBox);
+                await _redisCacheService.SetCacheValueAsync($"Box:{id}", response);
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)
@@ -138,6 +149,10 @@ public class BoxController : MainController
             async () =>
             {
                 await _boxService.SoftDeleteBoxAsync(id, UserEmail);
+
+                await _redisCacheService.RemoveCacheValueAsync($"Box:{id}");
+                await _redisCacheService.InvalidatePagedCacheAsync();
+
                 return CustomResponse(null, StatusCodes.Status204NoContent);
             },
             ex => CustomResponse(ex.Message, StatusCodes.Status400BadRequest)

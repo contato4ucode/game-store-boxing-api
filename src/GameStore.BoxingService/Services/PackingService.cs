@@ -32,6 +32,43 @@ public class PackingService : IPackingService
         };
     }
 
+    public async Task<List<OrderPackingResponseDTO>> ProcessOrdersAsync(List<Guid> orderIds)
+    {
+        var responses = new List<OrderPackingResponseDTO>();
+
+        foreach (var orderId in orderIds)
+        {
+            var order = await _unitOfWork.Orders.GetById(orderId);
+            if (order == null || !order.Products.Any())
+            {
+                responses.Add(new OrderPackingResponseDTO
+                {
+                    OrderId = orderId,
+                    Boxes = new List<BoxAllocationDTO> {
+                        new BoxAllocationDTO
+                        {
+                            BoxId = null,
+                            Products = new List<string>(),
+                            Observation = "Order not found or contains no products."
+                        }
+                    }
+                });
+                continue;
+            }
+
+            var availableBoxes = await _unitOfWork.Boxes.GetAll();
+            var allocations = AllocateProductsToBoxes(order.Products, availableBoxes);
+
+            responses.Add(new OrderPackingResponseDTO
+            {
+                OrderId = orderId,
+                Boxes = allocations
+            });
+        }
+
+        return responses;
+    }
+
     private List<BoxAllocationDTO> AllocateProductsToBoxes(List<Product> products, IEnumerable<Box> availableBoxes)
     {
         var allocations = new List<BoxAllocationDTO>();
