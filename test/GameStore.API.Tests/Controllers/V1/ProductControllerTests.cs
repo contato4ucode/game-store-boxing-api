@@ -4,6 +4,7 @@ using GameStore.API.Contracts.Requests;
 using GameStore.API.Contracts.Responses;
 using GameStore.API.Controllers.V1;
 using GameStore.Domain.Common;
+using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.ValueObjects;
@@ -45,12 +46,12 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         // Arrange
         var productId = Guid.NewGuid();
         var product = new Product { Id = productId };
-        var productResponse = new ProductResponse { Id = productId, Name = string.Empty };
+        var productResponse = new ProductDTO { Id = productId, Name = string.Empty };
         var cacheKey = $"Product:{productId}";
 
-        _redisCacheServiceMock.GetCacheValueAsync<ProductResponse>(cacheKey).Returns((ProductResponse)null);
+        _redisCacheServiceMock.GetCacheValueAsync<ProductDTO>(cacheKey).Returns((ProductDTO)null);
         _productServiceMock.GetByIdAsync(productId).Returns(product);
-        _mapperMock.Map<ProductResponse>(product).Returns(productResponse);
+        _mapperMock.Map<ProductDTO>(product).Returns(productResponse);
 
         // Act
         var result = await controller.GetProductById(productId);
@@ -93,7 +94,7 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         new Product("Product 2", new Dimensions(5, 5, 5), 0.5, 50)
     };
 
-        var productResponses = products.Select(p => new ProductResponse
+        var productResponses = products.Select(p => new ProductDTO
         {
             Name = p.Name,
             Dimensions = p.Dimensions,
@@ -103,7 +104,7 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
 
         var cacheKey = "ProductList:Page:1:PageSize:20";
 
-        var paginatedResponse = new PaginatedResponse<ProductResponse>(
+        var paginatedResponse = new PaginatedResponse<ProductDTO>(
             productResponses,
             count: productResponses.Count,
             pageNumber: 1,
@@ -111,11 +112,11 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         );
 
         _redisCacheServiceMock
-            .GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey)
-            .Returns((PaginatedResponse<ProductResponse>)null);
+            .GetCacheValueAsync<PaginatedResponse<ProductDTO>>(cacheKey)
+            .Returns((PaginatedResponse<ProductDTO>)null);
 
         _productServiceMock.GetAllAsync().Returns(products);
-        _mapperMock.Map<IEnumerable<ProductResponse>>(products).Returns(productResponses);
+        _mapperMock.Map<IEnumerable<ProductDTO>>(products).Returns(productResponses);
 
         // Act
         var result = await controller.GetAllProducts(1, 20);
@@ -127,17 +128,17 @@ public class ProductControllerTests : BaseControllerTests<ProductController>
         var response = okResult.Value;
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
 
-        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<ProductResponse>;
+        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<ProductDTO>;
         Assert.NotNull(data);
         Assert.Equal(paginatedResponse.Items, data.Items);
 
         await _redisCacheServiceMock.Received(1)
-            .GetCacheValueAsync<PaginatedResponse<ProductResponse>>(cacheKey);
+            .GetCacheValueAsync<PaginatedResponse<ProductDTO>>(cacheKey);
 
         await _redisCacheServiceMock.Received(1)
             .SetCacheValueAsync(
                 cacheKey,
-                Arg.Is<PaginatedResponse<ProductResponse>>(p =>
+                Arg.Is<PaginatedResponse<ProductDTO>>(p =>
                     p.TotalItems == paginatedResponse.TotalItems &&
                     p.PageNumber == paginatedResponse.PageNumber &&
                     p.PageSize == paginatedResponse.PageSize &&

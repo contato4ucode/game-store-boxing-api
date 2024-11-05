@@ -46,12 +46,12 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         // Arrange
         var orderId = Guid.NewGuid();
         var order = new Order { Id = orderId };
-        var orderResponse = new OrderResponse { Id = orderId };
+        var orderResponse = new OrderDTO { Id = orderId };
         var cacheKey = $"Order:{orderId}";
 
-        _redisCacheServiceMock.GetCacheValueAsync<OrderResponse>(cacheKey).Returns((OrderResponse)null);
+        _redisCacheServiceMock.GetCacheValueAsync<OrderDTO>(cacheKey).Returns((OrderDTO)null);
         _orderServiceMock.GetOrderByIdAsync(orderId).Returns(order);
-        _mapperMock.Map<OrderResponse>(order).Returns(orderResponse);
+        _mapperMock.Map<OrderDTO>(order).Returns(orderResponse);
 
         // Act
         var result = await controller.GetOrderById(orderId);
@@ -100,11 +100,11 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
             })
         };
 
-        var orderResponses = orders.Select(o => new OrderResponse
+        var orderResponses = orders.Select(o => new OrderDTO
         {
             Id = o.Id,
             OrderDate = o.OrderDate,
-            Products = o.Products.Select(p => new ProductResponse
+            Products = o.Products.Select(p => new ProductDTO
             {
                 Name = p.Name,
                 Dimensions = p.Dimensions,
@@ -114,8 +114,7 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         }).ToList();
 
         var cacheKey = "OrderList:Page:1:PageSize:10";
-
-        var paginatedResponse = new PaginatedResponse<OrderResponse>(
+        var paginatedResponse = new PaginatedResponse<OrderDTO>(
             orderResponses,
             count: orderResponses.Count,
             pageNumber: 1,
@@ -123,11 +122,11 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         );
 
         _redisCacheServiceMock
-            .GetCacheValueAsync<PaginatedResponse<OrderResponse>>(cacheKey)
-            .Returns((PaginatedResponse<OrderResponse>)null);
+            .GetCacheValueAsync<PaginatedResponse<OrderDTO>>(cacheKey)
+            .Returns((PaginatedResponse<OrderDTO>)null);
 
         _orderServiceMock.GetAllOrdersAsync().Returns(orders);
-        _mapperMock.Map<IEnumerable<OrderResponse>>(orders).Returns(orderResponses);
+        _mapperMock.Map<IEnumerable<OrderDTO>>(orders).Returns(orderResponses);
 
         // Act
         var result = await controller.GetAllOrders(1, 10);
@@ -139,17 +138,17 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         var response = okResult.Value;
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
 
-        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<OrderResponse>;
+        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<OrderDTO>;
         Assert.NotNull(data);
         Assert.Equal(paginatedResponse.Items, data.Items);
 
         await _redisCacheServiceMock.Received(1)
-            .GetCacheValueAsync<PaginatedResponse<OrderResponse>>(cacheKey);
+            .GetCacheValueAsync<PaginatedResponse<OrderDTO>>(cacheKey);
 
         await _redisCacheServiceMock.Received(1)
-            .SetCacheValueAsync(
+            .SetCacheValueWithPaginationAsync(
                 cacheKey,
-                Arg.Is<PaginatedResponse<OrderResponse>>(p =>
+                Arg.Is<PaginatedResponse<OrderDTO>>(p =>
                     p.TotalItems == paginatedResponse.TotalItems &&
                     p.PageNumber == paginatedResponse.PageNumber &&
                     p.PageSize == paginatedResponse.PageSize &&
@@ -224,6 +223,115 @@ public class OrderControllerTests : BaseControllerTests<OrderController>
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
 
         // Assert
+        var response = badRequestResult.Value;
+        Assert.False((bool)response.GetType().GetProperty("success").GetValue(response));
+        Assert.Equal("Order creation failed", response.GetType().GetProperty("errors").GetValue(response));
+    }
+
+    [Fact]
+    public async Task CreateOrdersBulk_ShouldReturn201_WhenOrdersAreCreated()
+    {
+        // Arrange
+        var productId1 = Guid.NewGuid();
+        var productId2 = Guid.NewGuid();
+        var productId3 = Guid.NewGuid();
+
+        var requests = new List<OrderRequest>
+        {
+            new OrderRequest
+            {
+                CustomerId = Guid.NewGuid(),
+                ProductIds = new List<Guid> { productId1, productId2 },
+                OrderDate = DateTime.UtcNow.AddHours(-1)
+            },
+            new OrderRequest
+            {
+                CustomerId = Guid.NewGuid(),
+                ProductIds = new List<Guid> { productId3 },
+                OrderDate = DateTime.UtcNow.AddHours(-2)
+            }
+        };
+
+        var products = new List<Product>
+        {
+            new Product("Product 1", new Dimensions(10, 10, 10), 1.5, 100) { Id = productId1 },
+            new Product("Product 2", new Dimensions(5, 5, 5), 0.5, 50) { Id = productId2 },
+            new Product("Product 3", new Dimensions(8, 8, 8), 0.3, 30) { Id = productId3 }
+        };
+
+        var createdOrders = requests.Select(request => new Order(
+            request.CustomerId,
+            request.OrderDate ?? DateTime.UtcNow,
+            request.ProductIds.Select(id => products.First(p => p.Id == id)).ToList()
+        )).ToList();
+
+        _orderServiceMock.CreateOrdersBulkAsync(Arg.Any<List<OrderDTO>>(), Arg.Any<string>())
+            .Returns(createdOrders);
+
+        var response = createdOrders.Select(o => new OrderResponse
+        {
+            Id = o.Id,
+            CustomerId = o.CustomerId,
+            OrderDate = o.OrderDate,
+            Products = o.Products.Select(p => new ProductResponse
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Dimensions = p.Dimensions,
+                Weight = p.Weight,
+                Price = p.Price
+            }).ToList()
+        }).ToList();
+
+        _mapperMock.Map<List<OrderResponse>>(createdOrders).Returns(response);
+
+        // Act
+        var result = await controller.CreateOrdersBulk(requests) as ObjectResult;
+
+        // Assert
+        result.Should().NotBeNull();
+        result.StatusCode.Should().Be(StatusCodes.Status201Created);
+
+        var resultData = result.Value;
+        Assert.NotNull(resultData);
+        Assert.True((bool)resultData.GetType().GetProperty("success").GetValue(resultData));
+
+        var data = resultData.GetType().GetProperty("data").GetValue(resultData) as List<OrderResponse>;
+        Assert.NotNull(data);
+        Assert.Equal(response.Count, data.Count);
+
+        await _redisCacheServiceMock.Received(1).InvalidatePagedCacheAsync();
+    }
+
+    [Fact]
+    public async Task CreateOrdersBulk_ShouldReturnBadRequest_WhenOrderCreationFails()
+    {
+        // Arrange
+        var requests = new List<OrderRequest>
+        {
+            new OrderRequest
+            {
+                CustomerId = Guid.NewGuid(),
+                ProductIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
+                OrderDate = DateTime.UtcNow
+            },
+            new OrderRequest
+            {
+                CustomerId = Guid.NewGuid(),
+                ProductIds = new List<Guid> { Guid.NewGuid() },
+                OrderDate = DateTime.UtcNow
+            }
+        };
+
+        _orderServiceMock.CreateOrdersBulkAsync(Arg.Any<List<OrderDTO>>(), Arg.Any<string>())
+            .Returns((List<Order>)null);
+
+        // Act
+        var result = await controller.CreateOrdersBulk(requests);
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+
+        // Assert
+        Assert.NotNull(badRequestResult.Value);
         var response = badRequestResult.Value;
         Assert.False((bool)response.GetType().GetProperty("success").GetValue(response));
         Assert.Equal("Order creation failed", response.GetType().GetProperty("errors").GetValue(response));

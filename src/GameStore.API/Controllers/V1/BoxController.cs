@@ -1,17 +1,16 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
+using GameStore.API.Contracts.Requests;
+using GameStore.API.Contracts.Responses;
+using GameStore.Domain.Common;
+using GameStore.Domain.DTOs;
+using GameStore.Domain.Interfaces;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
-using GameStore.Domain.Interfaces;
 using GameStore.Domain.Models;
 using GameStore.Identity.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using GameStore.API.Contracts.Requests;
-using GameStore.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
-using GameStore.API.Contracts.Responses;
-using Azure;
-using GameStore.Domain.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.API.Controllers.V1;
 

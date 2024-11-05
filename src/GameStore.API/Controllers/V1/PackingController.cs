@@ -54,7 +54,7 @@ public class PackingController : MainController
             async () =>
             {
                 var result = await _packingService.ProcessOrdersAsync(orderIds);
-                return CustomResponse(new { pedidos = result });
+                return CustomResponse(new { orders = result });
             },
             ex =>
             {

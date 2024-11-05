@@ -1,11 +1,13 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using GameStore.BoxingService.Services;
+using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.Validations;
 using GameStore.Domain.Models.ValueObjects;
+using GameStore.Domain.Notifications;
 using NSubstitute;
 using System.Linq.Expressions;
 
@@ -22,6 +24,38 @@ public class OrderServiceTests
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _notifier = Substitute.For<INotifier>();
         _orderService = new OrderService(_unitOfWork, _notifier);
+    }
+
+    [Fact]
+    public async Task GetOrderByIdAsync_Should_Return_Order_When_Found()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
+        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products) { Id = orderId };
+
+        _unitOfWork.Orders.GetById(orderId).Returns(order);
+
+        // Act
+        var result = await _orderService.GetOrderByIdAsync(orderId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(orderId, result.Id);
+    }
+
+    [Fact]
+    public async Task GetOrderByIdAsync_Should_Return_Null_When_Not_Found()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        _unitOfWork.Orders.GetById(orderId).Returns((Order)null);
+
+        // Act
+        var result = await _orderService.GetOrderByIdAsync(orderId);
+
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
@@ -87,35 +121,69 @@ public class OrderServiceTests
     }
 
     [Fact]
-    public async Task GetOrderByIdAsync_Should_Return_Order_When_Found()
+    public async Task CreateOrdersBulkAsync_Should_Return_Orders_When_Valid()
     {
         // Arrange
-        var orderId = Guid.NewGuid();
-        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
-        var order = new Order(Guid.NewGuid(), DateTime.UtcNow, products) { Id = orderId };
+        var ordersDto = new List<OrderDTO>
+        {
+            new OrderDTO
+            {
+                CustomerId = Guid.NewGuid(),
+                OrderDate = DateTime.UtcNow.AddDays(-1),
+                Products = new List<ProductDTO> { new ProductDTO { Id = Guid.NewGuid() } }
+            },
+            new OrderDTO
+            {
+                CustomerId = Guid.NewGuid(),
+                OrderDate = DateTime.UtcNow,
+                Products = new List<ProductDTO> { new ProductDTO { Id = Guid.NewGuid() } }
+            }
+        };
 
-        _unitOfWork.Orders.GetById(orderId).Returns(order);
+        var products = new List<Product> { new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m) };
+        _unitOfWork.Products.Find(Arg.Any<Expression<Func<Product, bool>>>()).Returns(products);
+
+        _unitOfWork.Orders.AddRange(Arg.Any<IEnumerable<Order>>()).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _orderService.GetOrderByIdAsync(orderId);
+        var result = await _orderService.CreateOrdersBulkAsync(ordersDto, "test@email");
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(orderId, result.Id);
+        Assert.Equal(ordersDto.Count, result.Count());
+
+        await _unitOfWork.Orders.Received(1).AddRange(Arg.Any<IEnumerable<Order>>());
+        await _unitOfWork.Received(1).SaveAsync();
+        await _unitOfWork.Received(1).CommitTransactionAsync();
     }
 
     [Fact]
-    public async Task GetOrderByIdAsync_Should_Return_Null_When_Not_Found()
+    public async Task CreateOrdersBulkAsync_Should_Handle_Transaction_Rollback_On_Exception()
     {
         // Arrange
-        var orderId = Guid.NewGuid();
-        _unitOfWork.Orders.GetById(orderId).Returns((Order)null);
+        var ordersDto = new List<OrderDTO>
+        {
+            new OrderDTO
+            {
+                CustomerId = Guid.NewGuid(),
+                OrderDate = DateTime.UtcNow,
+                Products = new List<ProductDTO> { new ProductDTO { Id = Guid.NewGuid() } }
+            }
+        };
+
+        _unitOfWork.Products.Find(Arg.Any<Expression<Func<Product, bool>>>())
+            .Returns(Task.FromException<IEnumerable<Product>>(new Exception("Unexpected error")));
 
         // Act
-        var result = await _orderService.GetOrderByIdAsync(orderId);
+        var result = await _orderService.CreateOrdersBulkAsync(ordersDto, "test@email");
 
         // Assert
-        Assert.Null(result);
+        Assert.Empty(result);
+        await _unitOfWork.Received(1).RollbackTransactionAsync();
+
+        _notifier.Received().Handle(
+            Arg.Is<string>(s => s.Contains("An unexpected error occurred: Unexpected error. Please try again later or contact support.")),
+            NotificationType.Error);
     }
 
     [Fact]
@@ -175,5 +243,27 @@ public class OrderServiceTests
         // Assert
         Assert.False(result);
         _notifier.Received(1).Handle("Order not found.");
+    }
+
+    [Fact]
+    public async Task OrderValidator_Should_Return_Error_When_OrderDate_Is_In_Future()
+    {
+        // Arrange
+        var validator = new OrderValidator(_unitOfWork);
+        validator.ConfigureRulesForCreate();
+
+        var productList = new List<Product>
+        {
+            new Product("Test Product", new Dimensions(10, 10, 10), 2.0, 50.0m)
+        };
+
+        var order = new Order(Guid.NewGuid(), DateTime.UtcNow.AddDays(1), productList);
+
+        // Act
+        var validationResult = await validator.ValidateAsync(order);
+
+        // Assert
+        Assert.False(validationResult.IsValid);
+        Assert.Contains(validationResult.Errors, e => e.ErrorMessage == "Order date cannot be in the future.");
     }
 }

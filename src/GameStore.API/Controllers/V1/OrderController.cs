@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
-using Azure;
 using GameStore.API.Contracts.Requests;
 using GameStore.API.Contracts.Responses;
 using GameStore.Domain.Common;
@@ -138,7 +137,7 @@ public class OrderController : MainController
 
                 var createdOrders = await _orderService.CreateOrdersBulkAsync(orderDtos, UserEmail);
 
-                if (createdOrders == null || !createdOrders.Any())
+                if (createdOrders == null)
                 {
                     return CustomResponse("Order creation failed", StatusCodes.Status400BadRequest);
                 }

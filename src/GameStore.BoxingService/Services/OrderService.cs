@@ -1,4 +1,5 @@
-﻿using GameStore.Domain.DTOs;
+﻿using FluentValidation.Results;
+using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Notifications;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
@@ -87,20 +88,44 @@ public class OrderService : BaseService, IOrderService
 
     public async Task<IEnumerable<Order>> CreateOrdersBulkAsync(List<OrderDTO> orderDtos, string userEmail)
     {
+        await _unitOfWork.BeginTransactionAsync();
+
+        var orders = new List<Order>();
+        var validationErrors = new List<ValidationResult>();
+
         try
         {
-            await _unitOfWork.BeginTransactionAsync();
-
-            var orders = new List<Order>();
-
             foreach (var orderDto in orderDtos)
             {
                 var products = await LoadProductsByIdsAsync(orderDto.Products.Select(p => p.Id).ToList());
+                var order = new Order(orderDto.CustomerId, orderDto.OrderDate, products)
+                {
+                    CreatedByUser = userEmail
+                };
 
-                var order = new Order(orderDto.CustomerId, orderDto.OrderDate, products);
-                order.CreatedByUser = userEmail;
+                var validator = new OrderValidator(_unitOfWork);
+                validator.ConfigureRulesForCreate();
+                var validationResult = await validator.ValidateAsync(order);
 
-                orders.Add(order);
+                if (!validationResult.IsValid)
+                {
+                    validationErrors.Add(validationResult);
+                }
+                else
+                {
+                    orders.Add(order);
+                }
+            }
+
+            if (validationErrors.Any())
+            {
+                foreach (var error in validationErrors)
+                {
+                    _notifier.NotifyValidationErrors(error);
+                }
+
+                await _unitOfWork.RollbackTransactionAsync();
+                return Enumerable.Empty<Order>();
             }
 
             await _unitOfWork.Orders.AddRange(orders);
@@ -124,7 +149,7 @@ public class OrderService : BaseService, IOrderService
             await _unitOfWork.BeginTransactionAsync();
 
             var existingOrder = await _unitOfWork.Orders.GetById(order.Id);
-            if (existingOrder ==  null)
+            if (existingOrder == null)
             {
                 _notifier.Handle("Order not found", NotificationType.Error);
                 return false;

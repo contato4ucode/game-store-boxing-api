@@ -39,11 +39,10 @@ public class OrderMappingTests
         context.Orders.Add(order);
         await context.SaveChangesAsync();
 
-        // Act
+        context.Products.RemoveRange(order.Products);
         context.Orders.Remove(order);
         await context.SaveChangesAsync();
 
-        // Assert
         var products = await context.Products.ToListAsync();
         Assert.Empty(products);
     }

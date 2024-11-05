@@ -5,6 +5,7 @@ using GameStore.API.Contracts.Responses;
 using GameStore.API.Controllers.V1;
 using GameStore.BoxingService.Services;
 using GameStore.Domain.Common;
+using GameStore.Domain.DTOs;
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Models;
 using GameStore.Domain.Models.ValueObjects;
@@ -63,12 +64,12 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var dimensions = new Dimensions(10, 10, 10);
 
         var box = new Box("Box 1", dimensions);
-        var boxResponse = new BoxResponse { Name = "Box 1", Dimensions = dimensions };
+        var boxResponse = new BoxDTO { Name = "Box 1", Dimensions = dimensions };
         var cacheKey = $"Box:{boxId}";
 
-        _redisCacheServiceMock.GetCacheValueAsync<BoxResponse>(cacheKey).Returns((BoxResponse)null);
+        _redisCacheServiceMock.GetCacheValueAsync<BoxDTO>(cacheKey).Returns((BoxDTO)null);
         _boxServiceMock.GetByIdAsync(boxId).Returns(Task.FromResult(box));
-        _mapperMock.Map<BoxResponse>(box).Returns(boxResponse);
+        _mapperMock.Map<BoxDTO>(box).Returns(boxResponse);
 
         var result = await controller.GetBoxById(boxId);
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -79,7 +80,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
         Assert.Equal(boxResponse, response.GetType().GetProperty("data").GetValue(response));
 
-        await _redisCacheServiceMock.Received(1).GetCacheValueAsync<BoxResponse>(cacheKey);
+        await _redisCacheServiceMock.Received(1).GetCacheValueAsync<BoxDTO>(cacheKey);
         await _redisCacheServiceMock.Received(1).SetCacheValueAsync(cacheKey, boxResponse);
     }
 
@@ -89,7 +90,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var boxId = Guid.NewGuid();
         var cacheKey = $"Box:{boxId}";
 
-        _redisCacheServiceMock.GetCacheValueAsync<BoxResponse>(cacheKey).Returns((BoxResponse)null);
+        _redisCacheServiceMock.GetCacheValueAsync<BoxDTO>(cacheKey).Returns((BoxDTO)null);
         _boxServiceMock.GetByIdAsync(boxId).Returns(Task.FromResult<Box>(null));
 
         var result = await controller.GetBoxById(boxId);
@@ -97,7 +98,7 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
 
         VerifyErrorResponse(notFoundResult, "Box not found");
 
-        await _redisCacheServiceMock.Received(1).GetCacheValueAsync<BoxResponse>(cacheKey);
+        await _redisCacheServiceMock.Received(1).GetCacheValueAsync<BoxDTO>(cacheKey);
     }
 
     [Fact]
@@ -106,13 +107,13 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         // Arrange
         var dimensions = new Dimensions(10, 10, 10);
         var boxes = new List<Box> { new Box("Box 1", dimensions) };
-        var boxResponses = new List<BoxResponse>
+        var boxResponses = new List<BoxDTO>
         {
-            new BoxResponse { Name = "Box 1", Dimensions = dimensions }
+            new BoxDTO { Name = "Box 1", Dimensions = dimensions }
         };
         var cacheKey = "BoxList:Page:1:PageSize:20";
 
-        var paginatedResponse = new PaginatedResponse<BoxResponse>(
+        var paginatedResponse = new PaginatedResponse<BoxDTO>(
             boxResponses,
             count: boxResponses.Count,
             pageNumber: 1,
@@ -120,11 +121,11 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         );
 
         _redisCacheServiceMock
-            .GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey)
-            .Returns((PaginatedResponse<BoxResponse>)null);
+            .GetCacheValueAsync<PaginatedResponse<BoxDTO>>(cacheKey)
+            .Returns((PaginatedResponse<BoxDTO>)null);
 
         _boxServiceMock.GetAllAsync().Returns(Task.FromResult((IEnumerable<Box>)boxes));
-        _mapperMock.Map<IEnumerable<BoxResponse>>(boxes).Returns(boxResponses);
+        _mapperMock.Map<IEnumerable<BoxDTO>>(boxes).Returns(boxResponses);
 
         // Act
         var result = await controller.GetAllBoxes(1, 20);
@@ -136,16 +137,16 @@ public class BoxControllerTests : BaseControllerTests<BoxController>
         var response = okResult.Value;
         Assert.True((bool)response.GetType().GetProperty("success").GetValue(response));
 
-        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<BoxResponse>;
+        var data = response.GetType().GetProperty("data").GetValue(response) as PaginatedResponse<BoxDTO>;
         Assert.NotNull(data);
         Assert.Equal(paginatedResponse.Items, data.Items);
 
         await _redisCacheServiceMock.Received(1)
-            .GetCacheValueAsync<PaginatedResponse<BoxResponse>>(cacheKey);
+            .GetCacheValueAsync<PaginatedResponse<BoxDTO>>(cacheKey);
 
         await _redisCacheServiceMock.Received(1)
             .SetCacheValueAsync(cacheKey,
-                Arg.Is<PaginatedResponse<BoxResponse>>(p =>
+                Arg.Is<PaginatedResponse<BoxDTO>>(p =>
                     p.TotalItems == paginatedResponse.TotalItems &&
                     p.PageNumber == paginatedResponse.PageNumber &&
                     p.PageSize == paginatedResponse.PageSize &&
