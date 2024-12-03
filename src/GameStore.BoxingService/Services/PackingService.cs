@@ -2,6 +2,7 @@
 using GameStore.Domain.Interfaces.Services;
 using GameStore.Domain.Interfaces.UoW;
 using GameStore.Domain.Models;
+using GameStore.Domain.Models.ValueObjects;
 
 namespace GameStore.BoxingService.Services;
 
@@ -18,9 +19,7 @@ public class PackingService : IPackingService
     {
         var order = await _unitOfWork.Orders.GetById(orderId);
         if (order == null || !order.Products.Any())
-        {
-            throw new Exception("Order not found or contains no products.");
-        }
+            return CreateOrderResponseWithObservation(orderId, "Order not found or contains no products.");
 
         var availableBoxes = await _unitOfWork.Boxes.GetAll();
         var allocations = AllocateProductsToBoxes(order.Products, availableBoxes);
@@ -35,30 +34,18 @@ public class PackingService : IPackingService
     public async Task<List<OrderPackingResponseDTO>> ProcessOrdersAsync(List<Guid> orderIds)
     {
         var responses = new List<OrderPackingResponseDTO>();
+        var availableBoxes = await _unitOfWork.Boxes.GetAll();
 
         foreach (var orderId in orderIds)
         {
             var order = await _unitOfWork.Orders.GetById(orderId);
             if (order == null || !order.Products.Any())
             {
-                responses.Add(new OrderPackingResponseDTO
-                {
-                    OrderId = orderId,
-                    Boxes = new List<BoxAllocationDTO> {
-                        new BoxAllocationDTO
-                        {
-                            BoxId = null,
-                            Products = new List<string>(),
-                            Observation = "Order not found or contains no products."
-                        }
-                    }
-                });
+                responses.Add(CreateOrderResponseWithObservation(orderId, "Order not found or contains no products."));
                 continue;
             }
 
-            var availableBoxes = await _unitOfWork.Boxes.GetAll();
             var allocations = AllocateProductsToBoxes(order.Products, availableBoxes);
-
             responses.Add(new OrderPackingResponseDTO
             {
                 OrderId = orderId,
@@ -72,46 +59,67 @@ public class PackingService : IPackingService
     private List<BoxAllocationDTO> AllocateProductsToBoxes(List<Product> products, IEnumerable<Box> availableBoxes)
     {
         var allocations = new List<BoxAllocationDTO>();
+        var remainingProducts = new List<Product>(products);
 
-        var sortedProducts = products
-            .OrderByDescending(p => p.Volume)
-            .ToList();
-
-        foreach (var product in sortedProducts)
+        foreach (var box in availableBoxes.OrderBy(b => b.Volume))
         {
-            var suitableBox = availableBoxes
-                .Where(b =>
-                    b.Dimensions.Height >= product.Dimensions.Height &&
-                    b.Dimensions.Width >= product.Dimensions.Width &&
-                    b.Dimensions.Length >= product.Dimensions.Length)
-                .OrderBy(b => b.Volume)
-                .FirstOrDefault();
-
-            if (suitableBox == null)
+            var boxAllocation = new BoxAllocationDTO
             {
-                allocations.Add(new BoxAllocationDTO
+                BoxId = box.Name,
+                Products = new List<string>()
+            };
+
+            foreach (var product in remainingProducts.ToList())
+            {
+                if (FitsInBox(product.Dimensions, box.Dimensions))
                 {
-                    BoxId = null,
-                    Products = new List<string> { product.Name },
-                    Observation = "Produto não cabe em nenhuma caixa disponível."
-                });
-                continue;
+                    boxAllocation.Products.Add(product.Name);
+                    remainingProducts.Remove(product);
+                }
             }
 
-            var allocation = allocations.FirstOrDefault(a => a.BoxId == suitableBox.Name);
-            if (allocation == null)
+            if (boxAllocation.Products.Any())
             {
-                allocation = new BoxAllocationDTO
-                {
-                    BoxId = suitableBox.Name,
-                    Products = new List<string>()
-                };
-                allocations.Add(allocation);
+                allocations.Add(boxAllocation);
             }
 
-            allocation.Products.Add(product.Name);
+            if (!remainingProducts.Any()) break;
+        }
+
+        if (remainingProducts.Any())
+        {
+            allocations.AddRange(remainingProducts.Select(product => new BoxAllocationDTO
+            {
+                BoxId = null,
+                Products = new List<string> { product.Name },
+                Observation = "Produto não cabe em nenhuma caixa disponível."
+            }));
         }
 
         return allocations;
+    }
+
+    private bool FitsInBox(Dimensions productDims, Dimensions boxDims)
+    {
+        return productDims.Height <= boxDims.Height &&
+               productDims.Width <= boxDims.Width &&
+               productDims.Length <= boxDims.Length;
+    }
+
+    private OrderPackingResponseDTO CreateOrderResponseWithObservation(Guid orderId, string observation)
+    {
+        return new OrderPackingResponseDTO
+        {
+            OrderId = orderId,
+            Boxes = new List<BoxAllocationDTO>
+            {
+                new BoxAllocationDTO
+                {
+                    BoxId = null,
+                    Products = new List<string>(),
+                    Observation = observation
+                }
+            }
+        };
     }
 }
